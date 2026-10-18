@@ -267,6 +267,12 @@ struct ScanResultView: View {
                             }
                         }
                     }
+                    if !review.isSameVintage(as: d) {
+                        Label("This score is for the \(review.vintage). Vinous hasn't reviewed the \(d.vintage.map(String.init) ?? "NV") yet.",
+                              systemImage: "info.circle")
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                    }
                     if !review.note.isEmpty {
                         Text(review.note).font(.callout).foregroundStyle(.secondary)
                     }
@@ -274,7 +280,7 @@ struct ScanResultView: View {
                     Text("Sign in to Vinous in Settings to see scores.").foregroundStyle(.secondary)
                     Button("Open Settings") { app.showSettings = true }.buttonStyle(.bordered)
                 } else {
-                    Text("No Vinous review found.").foregroundStyle(.secondary)
+                    Text("Vinous hasn't reviewed this wine.").foregroundStyle(.secondary)
                 }
             }
             if !lookup.vinous.isWorking {

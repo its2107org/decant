@@ -86,7 +86,7 @@ struct VinousBrowserSheet: View {
         defer { reading = false }
         do {
             let text = try await PageReader.settledText(of: webView, timeout: 8)
-            var review = try await Vinous.extract(from: text, wine: wine)
+            var review = try await Vinous.extract(from: text, wine: wine, trustPage: true)
             review.url = webView.url?.absoluteString ?? ""
             if review.found {
                 Vinous.rememberedSignIn = Vinous.rememberedSignIn || review.signedIn

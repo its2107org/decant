@@ -69,6 +69,7 @@ final class Wine {
     var vinousDrinkWindow: String = ""
     var vinousNote: String = ""
     var vinousURL: String = ""
+    var vinousVintage: String = ""
     var vinousCheckedAt: Date?
 
     // New York prices from the last check.
@@ -163,8 +164,29 @@ final class Wine {
         vinousDrinkWindow = v.drinkWindow
         vinousNote = v.note
         vinousURL = v.url
+        vinousVintage = v.vintage
         vinousCheckedAt = Date()
     }
+
+    /// Forgets a Vinous score (for example when a fresh look-up finds it was for a different wine).
+    func clearVinous() {
+        vinousScore = ""
+        vinousCritic = ""
+        vinousDrinkWindow = ""
+        vinousNote = ""
+        vinousURL = ""
+        vinousVintage = ""
+        vinousCheckedAt = Date()
+    }
+
+    /// True when the Vinous score is for another vintage of this wine.
+    var vinousIsOtherVintage: Bool {
+        guard !vinousScore.isEmpty, !vinousVintage.isEmpty else { return false }
+        return vinousVintage != vintageText
+    }
+
+    /// The Vinous score to show in lists: only when it's for this exact bottle.
+    var listVinousScore: String { vinousIsOtherVintage ? "" : vinousScore }
 
     /// A copy for "opened one bottle of several": same wine, now in Tasted.
     func tastedCopy() -> Wine {
@@ -180,6 +202,7 @@ final class Wine {
         w.vinousDrinkWindow = vinousDrinkWindow
         w.vinousNote = vinousNote
         w.vinousURL = vinousURL
+        w.vinousVintage = vinousVintage
         w.vinousCheckedAt = vinousCheckedAt
         w.nycLow = nycLow
         w.nycHigh = nycHigh

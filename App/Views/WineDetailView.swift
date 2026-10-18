@@ -152,11 +152,17 @@ struct WineDetailView: View {
                         }
                     }
                 }
+                if wine.vinousIsOtherVintage {
+                    Label("This score is for the \(wine.vinousVintage). Vinous hasn't reviewed the \(wine.vintageText) yet.",
+                          systemImage: "info.circle")
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                }
                 if !wine.vinousNote.isEmpty {
                     Text(wine.vinousNote).font(.callout).foregroundStyle(.secondary)
                 }
             } else if !checkingVinous {
-                Text(wine.vinousCheckedAt == nil ? "Not looked up yet." : "No Vinous review found.")
+                Text(wine.vinousCheckedAt == nil ? "Not looked up yet." : "Vinous hasn't reviewed this wine.")
                     .foregroundStyle(.secondary)
             }
             HStack {
@@ -286,7 +292,7 @@ struct WineDetailView: View {
             if review.found {
                 wine.applyVinous(review)
             } else {
-                wine.vinousCheckedAt = Date()
+                wine.clearVinous()
                 if !review.signedIn || !Vinous.rememberedSignIn {
                     problem = "Couldn't read a Vinous score. Check you're signed in to Vinous in Settings, or tap Open on Vinous."
                 }

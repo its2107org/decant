@@ -51,6 +51,23 @@ enum SelfTest {
             check("vivino link", PriceChecker.vivinoURL(details)?.absoluteString.contains("vivino.com/search/wines?q=Ridge") == true)
         }
 
+        // 3b. Vinous scores for another vintage are flagged and kept out of the list.
+        if let details {
+            var review = VinousReview(found: true, signedIn: true, score: "91", critic: "Josh Raynolds",
+                                      drinkWindow: "", note: "", url: "", vintage: "2016", pageWine: "")
+            check("other vintage spotted", !review.isSameVintage(as: details))
+            review.vintage = "2018"
+            check("same vintage accepted", review.isSameVintage(as: details))
+            let w = Wine(status: .cellar)
+            w.apply(details)
+            w.applyVinous(VinousReview(found: true, signedIn: true, score: "91", critic: "", drinkWindow: "",
+                                       note: "", url: "", vintage: "2016", pageWine: ""))
+            check("other vintage kept out of list", w.vinousIsOtherVintage && w.listVinousScore.isEmpty)
+            w.clearVinous()
+            check("wrong match cleared", w.vinousScore.isEmpty && w.vinousCheckedAt != nil)
+            check("description names the wine", details.fullDescription.contains("Santa Cruz Mountains"))
+        }
+
         // 4. The label schema is a valid structured-output schema shape.
         let required = LabelReader.schema["required"] as? [String] ?? []
         let properties = (LabelReader.schema["properties"] as? [String: Any])?.keys.sorted() ?? []

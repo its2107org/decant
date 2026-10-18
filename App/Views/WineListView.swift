@@ -272,8 +272,8 @@ struct WineRow: View {
             VStack(alignment: .trailing, spacing: 6) {
                 if wine.status == .tasted, let score = wine.myScore {
                     ScoreBadge(score: String(score), prominent: true)
-                } else if !wine.vinousScore.isEmpty {
-                    ScoreBadge(score: wine.vinousScore, prefix: "V")
+                } else if !wine.listVinousScore.isEmpty {
+                    ScoreBadge(score: wine.listVinousScore, prefix: "V")
                 }
                 if wine.status == .cellar, wine.bottles > 1 {
                     Text("×\(wine.bottles)")

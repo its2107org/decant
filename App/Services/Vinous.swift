@@ -37,62 +37,78 @@ enum Vinous {
     // MARK: - Lookup
 
     static func lookup(_ wine: WineDetails) async throws -> VinousReview {
-        guard let page = try await findPage(wine) else {
-            return VinousReview(found: false, signedIn: rememberedSignIn, score: "", critic: "",
-                                drinkWindow: "", note: "", url: "")
-        }
+        let notFound = VinousReview(found: false, signedIn: rememberedSignIn, score: "", critic: "",
+                                    drinkWindow: "", note: "", url: "")
+        guard let page = try await findPage(wine) else { return notFound }
         let text = try await PageReader.text(of: page)
-        var review = try await extract(from: text, wine: wine)
+        var review = try await extract(from: text, wine: wine, trustPage: false)
         review.url = page.absoluteString
         rememberedSignIn = review.signedIn
         return review
     }
 
-    /// Reads the score from text Ian already has open in the Vinous browser.
-    static func extract(from text: String, wine: WineDetails) async throws -> VinousReview {
+    private static let matchingRules = """
+    Matching rules (strict):
+    - Same producer AND the same wine: the same cuvée, vineyard, appellation or AVA designation and colour.
+    - A producer's other wines are different wines, even with the same grape. For example "Willamette Valley Pinot Noir" and "Pinot Noir Eola-Amity Hills Cuvée" are different wines; so are a "Reserve", a single-vineyard bottling, a second wine or a different appellation.
+    - Different vintages of the same wine count as the same wine.
+    """
+
+    /// Reads the score from a Vinous page's text. With `trustPage`, Ian chose the page himself,
+    /// so any score on it is used.
+    static func extract(from text: String, wine: WineDetails, trustPage: Bool) async throws -> VinousReview {
         let system = """
         You read the text of a Vinous (vinous.com) wine page for a subscriber and pull out the review.
-        - found: true if the page has a Vinous score for this wine (the same wine; the vintage should match if one is given).
+        - pageWine: the wine's name as the page shows it, with its vintage.
+        - sameWine: true only if the page is for the wine described. \(matchingRules)
         - signedIn: false if the page asks to sign in or subscribe instead of showing reviews.
-        - score: as printed, e.g. "94" or "92-94". If there are several reviews, use the most recent.
+        - vintage: the vintage of the review you report, e.g. "2022" or "NV".
+        - score: as printed, e.g. "94" or "92-94". Use the review of the described vintage if there is one, otherwise the most recent review on the page. Empty if none.
         - critic: the reviewer's name. drinkWindow: as printed, e.g. "2025-2040". Empty if missing.
         - note: the first two sentences of that tasting note, word for word. Empty if missing.
         """
-        let prompt = "Wine: \(wine.searchName)\n\nPage text:\n\(String(text.prefix(40_000)))"
+        let prompt = "The wine:\n\(wine.fullDescription)\n\nPage text:\n\(String(text.prefix(40_000)))"
         let schema: [String: Any] = [
             "type": "object",
             "properties": [
-                "found": ["type": "boolean"],
+                "pageWine": ["type": "string"],
+                "sameWine": ["type": "boolean"],
                 "signedIn": ["type": "boolean"],
+                "vintage": ["type": "string"],
                 "score": ["type": "string"],
                 "critic": ["type": "string"],
                 "drinkWindow": ["type": "string"],
                 "note": ["type": "string"]
             ],
-            "required": ["found", "signedIn", "score", "critic", "drinkWindow", "note"],
+            "required": ["pageWine", "sameWine", "signedIn", "vintage", "score", "critic", "drinkWindow", "note"],
             "additionalProperties": false
         ]
         struct Extracted: Decodable {
-            var found: Bool, signedIn: Bool, score: String, critic: String, drinkWindow: String, note: String
+            var pageWine: String, sameWine: Bool, signedIn: Bool, vintage: String
+            var score: String, critic: String, drinkWindow: String, note: String
         }
-        let e = try await Claude.structured(Extracted.self, model: Claude.haiku, system: system,
+        let e = try await Claude.structured(Extracted.self, model: Claude.sonnet, system: system,
                                             content: [["type": "text", "text": prompt]], schema: schema,
-                                            effort: "low", maxTokens: 4000)
-        return VinousReview(found: e.found && !e.score.isEmpty, signedIn: e.signedIn, score: e.score,
-                            critic: e.critic, drinkWindow: e.drinkWindow, note: e.note, url: "")
+                                            effort: "low", maxTokens: 6000)
+        let usable = !e.score.isEmpty && (e.sameWine || trustPage)
+        return VinousReview(found: usable, signedIn: e.signedIn, score: usable ? e.score : "",
+                            critic: usable ? e.critic : "", drinkWindow: usable ? e.drinkWindow : "",
+                            note: usable ? e.note : "", url: "", vintage: e.vintage, pageWine: e.pageWine)
     }
 
     /// Finds the wine's own page on Vinous with a web search limited to vinous.com.
     static func findPage(_ wine: WineDetails) async throws -> URL? {
         struct Found: Decodable { var url: String }
         let system = """
-        Find the Vinous (vinous.com) wine page for the given wine. Wine pages look like https://vinous.com/wines/<name>.
-        Prefer the exact vintage; if that vintage has no page, use the closest vintage of the same wine.
-        Finish your answer with only this JSON object: {"url":""} (empty if there is no page for this wine).
+        Find the Vinous (vinous.com) wine page for the wine described. Wine pages look like https://vinous.com/wines/<name>.
+        \(matchingRules)
+        Prefer the page for the exact vintage. If that vintage has no page, use the most recent vintage of the same wine.
+        If Vinous has no page for this exact wine, return an empty url; never return a different wine from the same producer.
+        Finish your answer with only this JSON object: {"url":""}
         """
         let found = try await Claude.searchThenAnswer(Found.self, system: system,
-                                                      prompt: "Wine: \(wine.searchName)",
-                                                      allowedDomains: ["vinous.com"], maxSearches: 3)
+                                                      prompt: "The wine:\n\(wine.fullDescription)",
+                                                      allowedDomains: ["vinous.com"], maxSearches: 4)
         guard let url = URL(string: found.url), url.host()?.contains("vinous.com") == true,
               url.path().hasPrefix("/wines/") else { return nil }
         return url
