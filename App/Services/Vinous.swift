@@ -66,8 +66,7 @@ enum Vinous {
         if chosen.isEmpty {
             chosen = try await pick(from: candidates, wine: wine)
         }
-        guard let entry = VinousSearch.bestReview(chosen) else { return notFound }
-        var review = entry.review(signedIn: signedIn || rememberedSignIn)
+        guard var review = VinousSearch.combined(chosen, signedIn: signedIn || rememberedSignIn) else { return notFound }
         if review.score.isEmpty, let page = URL(string: review.url) {
             // The search gave the right page but not the score; read the page itself with Ian's sign-in.
             let text = try await PageReader.text(of: page)
@@ -95,14 +94,171 @@ enum Vinous {
         return c.url ?? searchURL
     }
 
-    private static func search(term: String, vintage: Int) async throws -> [VinousSearch.Entry] {
+    /// What Ian types into Decant's Search tab, run through Vinous's own search.
+    static func searchWines(_ text: String) async throws -> (entries: [VinousSearch.Entry], signedIn: Bool) {
+        let (term, vintage) = VinousSearch.splitYear(text)
+        async let signedIn = sessionIsSignedIn()
+        let entries = try await search(term: term, vintage: vintage, perPage: 50)
+        let isIn = await signedIn
+        if isIn { rememberedSignIn = true }
+        return (entries, isIn)
+    }
+
+    private static func search(term: String, vintage: Int?, perPage: Int = 100) async throws -> [VinousSearch.Entry] {
         let (data, status) = try await get("/api/v2/wines", [
             URLQueryItem(name: "term", value: term),
-            URLQueryItem(name: "vintage", value: String(vintage)),
+            URLQueryItem(name: "vintage", value: vintage.map(String.init) ?? ""),
             URLQueryItem(name: "order", value: ""),
             URLQueryItem(name: "order_type", value: "desc"),
             URLQueryItem(name: "page", value: "1"),
-            URLQueryItem(name: "per_page", value: "100")
+            URLQueryItem(name: "per_page", value: String(perPage))
+        ])
+        guard status == 200 else { throw VinousError.searchFailed(status) }
+        return VinousSearch.entries(from: data)
+    }
+
+    private static func sessionIsSignedIn() async -> Bool {
+        (try? await get("/api/v2/sessions/current", []))?.1 == 200
+    }
+
+    /// Calls Vinous with the sign-in Ian made in Decant's Vinous browser.
+    private static func get(_ path: String, _ query: [URLQueryItem]) async throws -> (Data, Int) {
+        var c = URLComponents(string: "https://vinous.com" + path)!
+        if !query.isEmpty { c.queryItems = query }
+        var request = URLRequest(url: c.url!, timeoutInterval: 30)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        let cookies = await WKWebsiteDataStore.default().httpCookieStore.allCookies()
+            .filter { $0.domain.hasSuffix("vinous.com") }
+        for (field, value) in HTTPCookie.requestHeaderFields(with: cookies) {
+            request.setValue(value, forHTTPHeaderField: field)
+        }
+        request.httpShouldHandleCookies = false
+        let (data, response) = try await URLSession.shared.data(for: request)
+        return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
+    }
+
+    /// Asks Claude which search result is the bottle, when the names don't line up word for word.
+    private static func pick(from candidates: [VinousSearch.Entry], wine: WineDetails) async throws -> [VinousSearch.Entry] {
+        var groups: [[VinousSearch.Entry]] = []
+        for entry in candidates {
+            if let i = groups.firstIndex(where: { $0[0].key == entry.key }) { groups[i].append(entry) } else { groups.append([entry]) }
+        }
+        let list = groups.prefix(60).enumerated().map { i, group in
+            let e = group[0]
+            return "\(i). Producer: \(e.producer) | Wine: \(e.wine) | Region: \(e.region) | Colour: \(e.color) | Grapes: \(e.grapes)"
+        }.joined(separator: "\n")
+        let system = """
+        You match a wine bottle to Vinous (vinous.com) search results. All results are already the right vintage.
+        \(matchingRules)
+        - Producer names may be written differently (e.g. "R. López de Heredia" and "Lopez de Heredia", or "Evesham Wood Vineyard" and "Evesham Wood"). Vinous sometimes adds a first name or "Vineyard" to the same producer, but separate houses sharing a family name are different producers (e.g. Domaine Leflaive and Maison Olivier Leflaive).
+        - Word order and accents don't matter. Words such as "Tinto", "Grand Vin" or "Brut" on a label may be missing from Vinous's name.
+        Answer with the number of the result that is this exact wine, or -1 if none is.
+        """
+        let schema: [String: Any] = [
+            "type": "object",
+            "properties": ["choice": ["type": "integer"]],
+            "required": ["choice"],
+            "additionalProperties": false
+        ]
+        struct Choice: Decodable { var choice: Int }
+        let answer = try await Claude.structured(Choice.self, model: Claude.sonnet, system: system,
+                                                 content: [["type": "text", "text": "The bottle:\n\(wine.fullDescription)\n\nResults:\n\(list)"]],
+                                                 schema: schema, effort: "low", maxTokens: 2000)
+        guard groups.indices.contains(answer.choice), answer.choice < 60 else { return [] }
+        return groups[answer.choice]
+    }
+
+    private static let matchingRules = """
+    Matching rules (strict):
+    - Same producer AND the same wine: the same cuvée, vineyard, appellation or AVA designation and colour.
+    - A producer's other wines are different wines, even with the same grape. For example "Willamette Valley Pinot Noir" and "Pinot Noir Eola-Amity Hills Cuvée" are different wines; so are a "Reserve", a single-vineyard bottling, a second wine or a different appellation.
+    - The vintage must match exactly. Another vintage of the same wine does not count.
+    """
+
+    /// Reads the score from a Vinous page's text. With `trustPage`, Ian chose the page himself,
+    /// so any score on it is used.
+    static func extract(from text: String, wine: WineDetails, trustPage: Bool) async throws -> VinousReview {
+        let system = """
+        You read the text of a Vinous (vinous.com) wine page for a subscriber and pull out the reviews.
+        - pageWine: the wine's name as the page shows it, with its vintage.
+        - sameWine: true only if the page is for the wine described. \(matchingRules)
+        - signedIn: false if the page asks to sign in or subscribe instead of showing reviews.
+        - vintage: the vintage of the reviews you report, e.g. "2022" or "NV".
+        - If the page lists several wines, use only the one that is the wine described.
+        - reviews: every review of exactly the described vintage, newest first. Leave out reviews of other vintages, and any whose score is hidden (shown as "00" or behind "Subscriber Access Only").
+          score: as printed, e.g. "94" or "92-94". critic: the reviewer's name. date: when it was published, as printed, e.g. "July 2026". drinkWindow: as printed, e.g. "2025-2040". note: the first two sentences of its tasting note, word for word. Empty strings for anything missing.
+        """
+        let prompt = "The wine:\n\(wine.fullDescription)\n\nPage text:\n\(String(text.prefix(40_000)))"
+        let item: [String: Any] = [
+            "type": "object",
+            "properties": ["score": ["type": "string"], "critic": ["type": "string"], "date": ["type": "string"],
+                           "drinkWindow": ["type": "string"], "note": ["type": "string"]],
+            "required": ["score", "critic", "date", "drinkWindow", "note"],
+            "additionalProperties": false
+        ]
+        let schema: [String: Any] = [
+            "type": "object",
+            "properties": [
+                "pageWine": ["type": "string"],
+                "sameWine": ["type": "boolean"],
+                "signedIn": ["type": "boolean"],
+                "vintage": ["type": "string"],
+                "reviews": ["type": "array", "items": item]
+            ],
+            "required": ["pageWine", "sameWine", "signedIn", "vintage", "reviews"],
+            "additionalProperties": false
+        ]
+        struct Extracted: Decodable {
+            var pageWine: String, sameWine: Bool, signedIn: Bool, vintage: String
+            var reviews: [VinousReviewItem]
+        }
+        let e = try await Claude.structured(Extracted.self, model: Claude.sonnet, system: system,
+                                            content: [["type": "text", "text": prompt]], schema: schema,
+                                            effort: "low", maxTokens: 8000)
+        return review(from: e.reviews, pageWine: e.pageWine, vintage: e.vintage, signedIn: e.signedIn,
+                      usable: trustPage || (e.sameWine && VinousReview(found: false, signedIn: true, score: "", critic: "",
+                                                                       drinkWindow: "", note: "", url: "", vintage: e.vintage)
+                                                                .isSameVintage(as: wine)))
+    }
+
+    /// One answer from a page's reviews: a single review as it is, or several with their average as the score.
+    static func review(from items: [VinousReviewItem], pageWine: String, vintage: String, signedIn: Bool,
+                       usable: Bool) -> VinousReview {
+        var review = VinousReview(found: false, signedIn: signedIn, score: "", critic: "", drinkWindow: "",
+                                  note: "", url: "", vintage: vintage, pageWine: pageWine)
+        let scored = items.filter { Wine.scoreValue($0.score) != nil }
+        guard usable, let newest = scored.first else { return review }
+        review.found = true
+        review.score = newest.score
+        review.critic = newest.critic
+        review.drinkWindow = newest.drinkWindow
+        review.note = newest.note
+        if scored.count > 1 {
+            review.reviews = scored
+            review.score = VinousReview.average(scored.map(\.score))
+            review.critic = "Average of \(scored.count) reviews"
+        }
+        return review
+    }
+
+    /// What Ian types into Decant's Search tab, run through Vinous's own search.
+    static func searchWines(_ text: String) async throws -> (entries: [VinousSearch.Entry], signedIn: Bool) {
+        let (term, vintage) = VinousSearch.splitYear(text)
+        async let signedIn = sessionIsSignedIn()
+        let entries = try await search(term: term, vintage: vintage, perPage: 50)
+        let isIn = await signedIn
+        if isIn { rememberedSignIn = true }
+        return (entries, isIn)
+    }
+
+    private static func search(term: String, vintage: Int?, perPage: Int = 100) async throws -> [VinousSearch.Entry] {
+        let (data, status) = try await get("/api/v2/wines", [
+            URLQueryItem(name: "term", value: term),
+            URLQueryItem(name: "vintage", value: vintage.map(String.init) ?? ""),
+            URLQueryItem(name: "order", value: ""),
+            URLQueryItem(name: "order_type", value: "desc"),
+            URLQueryItem(name: "page", value: "1"),
+            URLQueryItem(name: "per_page", value: String(perPage))
         ])
         guard status == 200 else { throw VinousError.searchFailed(status) }
         return VinousSearch.entries(from: data)

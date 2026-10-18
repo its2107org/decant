@@ -29,7 +29,7 @@ struct DecantApp: App {
 }
 
 enum AppTab: Hashable {
-    case cellar, tasted, scan
+    case cellar, tasted, scan, search
 }
 
 @MainActor
@@ -55,6 +55,9 @@ struct RootView: View {
             }
             Tab("Scan", systemImage: "camera.viewfinder", value: AppTab.scan) {
                 ScanView()
+            }
+            Tab("Vinous", systemImage: "magnifyingglass", value: AppTab.search, role: .search) {
+                VinousSearchView()
             }
         }
         .sheet(isPresented: $app.showSettings) {

@@ -8,6 +8,8 @@ enum VinousSearch {
         var wine: String
         var vintage: Int
         var region: String
+        var area: String = ""
+        var country: String = ""
         var color: String
         var grapes: String
         var critic: String
@@ -17,18 +19,53 @@ enum VinousSearch {
         var note: String
         var slug: String
         var reviewDate: String
+        var articleDate: String = ""
 
         /// The same wine whatever the spelling, word order or accents: "Evesham Wood Vineyard · Pinot Noir Willamette Valley"
         /// and "Evesham Wood · Willamette Valley Pinot Noir" share a key.
         var key: String { VinousSearch.key(producer: producer, wine: wine) }
 
+        var vintageText: String { vintage > 0 ? String(vintage) : "NV" }
+        var title: String { "\(vintageText) \(wine)" }
+        var url: URL? { URL(string: "https://vinous.com/wines/\(slug)") }
+        var placeLine: String { [region, area, country].filter { !$0.isEmpty }.joined(separator: " · ") }
+        var fullNote: String {
+            note.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        /// The wine in Decant's own shape, for adding it to the Cellar or Tasted.
+        var details: WineDetails {
+            let grapeList = grapes.split(separator: ",").map {
+                $0.replacingOccurrences(of: #"^\s*\d+(\.\d+)?\s*%\s*"#, with: "", options: .regularExpression)
+                    .trimmingCharacters(in: .whitespaces)
+            }.filter { !$0.isEmpty }
+            let place = region.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            return WineDetails(identified: true, producer: producer, name: wine, vintage: vintage > 0 ? vintage : nil,
+                               style: WineStyle(loose: color).rawValue, grapes: grapeList, country: country,
+                               region: area.isEmpty ? (place.last ?? "") : area, subregion: place.count > 1 ? place.last ?? "" : "",
+                               appellation: place.first ?? "", classification: "", abv: nil, bottleSizeML: nil, labelText: "")
+        }
+
+        var drinkWindow: String { drinkFrom > 0 && drinkTo > 0 ? "\(drinkFrom)-\(drinkTo)" : "" }
+
         func review(signedIn: Bool) -> VinousReview {
-            let window = drinkFrom > 0 && drinkTo > 0 ? "\(drinkFrom)-\(drinkTo)" : ""
-            let year = vintage > 0 ? String(vintage) : "NV"
+            let window = drinkWindow
+            let year = vintageText
             return VinousReview(found: !score.isEmpty, signedIn: signedIn, score: score, critic: critic,
                                 drinkWindow: window, note: score.isEmpty ? "" : VinousSearch.firstSentences(note),
-                                url: "https://vinous.com/wines/\(slug)", vintage: year, pageWine: "\(year) \(wine)")
+                                url: url?.absoluteString ?? "", vintage: year, pageWine: title)
         }
+    }
+
+    /// Splits a typed search into words and a year: "evesham wood 2024" searches "evesham wood" in 2024.
+    static func splitYear(_ text: String) -> (term: String, vintage: Int?) {
+        guard let r = text.range(of: #"\b(19|20)\d\d\b"#, options: .regularExpression), let year = Int(text[r]) else {
+            return (tidy(text), nil)
+        }
+        var rest = text
+        rest.removeSubrange(r)
+        return (tidy(rest), year)
     }
 
     static func entries(from data: Data) -> [Entry] {
@@ -43,11 +80,13 @@ enum VinousSearch {
             var score = scoreText(s["score"])
             if score.isEmpty { score = scoreText(s["score_raw"]) }
             return Entry(id: id, producer: tidy(producer), wine: tidy(name), vintage: int(s["vintage"]) ?? 0,
-                         region: s["region_1"] as? String ?? "", color: s["color"] as? String ?? "",
+                         region: s["region_1"] as? String ?? "", area: s["region_2"] as? String ?? "",
+                         country: s["country"] as? String ?? "", color: s["color"] as? String ?? "",
                          grapes: s["grape_variety"] as? String ?? "", critic: s["author"] as? String ?? "",
                          score: score, drinkFrom: int(s["drinking_window_begin"]) ?? 0,
                          drinkTo: int(s["drinking_window_end"]) ?? 0, note: s["tasting_note"] as? String ?? "",
-                         slug: slug, reviewDate: s["review_date"] as? String ?? "")
+                         slug: slug, reviewDate: s["review_date"] as? String ?? "",
+                         articleDate: s["article_date"] as? String ?? "")
         }
     }
 
@@ -71,6 +110,37 @@ enum VinousSearch {
         let bottle = key(producer: wine.producer, wine: wine.name)
         guard !bottle.isEmpty else { return [] }
         return entries.filter { $0.key == bottle }
+    }
+
+    /// All the reviews of one wine and vintage in one answer: every scored review listed newest first,
+    /// with the average as the score.
+    static func combined(_ entries: [Entry], signedIn: Bool) -> VinousReview? {
+        guard let best = bestReview(entries) else { return nil }
+        var review = best.review(signedIn: signedIn)
+        var items: [VinousReviewItem] = []
+        for e in entries.filter({ !$0.score.isEmpty }).sorted(by: { $0.reviewDate > $1.reviewDate }) {
+            let item = VinousReviewItem(score: e.score, critic: e.critic, date: e.articleDate,
+                                        drinkWindow: e.drinkWindow, note: e.fullNote)
+            if !items.contains(where: { $0.score == item.score && $0.critic == item.critic && $0.date == item.date }) {
+                items.append(item)
+            }
+        }
+        if items.count > 1 {
+            review.reviews = items
+            review.score = VinousReview.average(items.map(\.score))
+            review.critic = "Average of \(items.count) reviews"
+        }
+        return review
+    }
+
+    /// Search results gathered into one row per wine and vintage.
+    static func grouped(_ entries: [Entry]) -> [[Entry]] {
+        var groups: [[Entry]] = []
+        for e in entries {
+            if let i = groups.firstIndex(where: { $0[0].key == e.key && $0[0].vintage == e.vintage }) { groups[i].append(e) }
+            else { groups.append([e]) }
+        }
+        return groups
     }
 
     /// Of several reviews of the same wine, the newest one with a score.
@@ -117,7 +187,7 @@ enum VinousSearch {
         word.filter(\.isLetter).count == 1 && word.count <= 2
     }
 
-    private static func tidy(_ s: String) -> String {
+    static func tidy(_ s: String) -> String {
         s.split(whereSeparator: \.isWhitespace).joined(separator: " ")
     }
 
@@ -149,3 +219,5 @@ enum VinousSearch {
         return sentences.joined(separator: " ")
     }
 }
+
+extension VinousSearch.Entry: Identifiable {}

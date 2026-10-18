@@ -57,5 +57,7 @@ for mode in light dark; do
   shoot "scan-$mode" -DecantDemo -DecantDemoScan
   shoot "scan-result-$mode" -DecantDemo -DecantDemoScanResult
   shoot "settings-$mode" -DecantDemo -DecantDemoSettings
+  shoot "search-$mode" -DecantDemo -DecantDemoSearch
+  shoot "search-result-$mode" -DecantDemo -DecantDemoSearch -DecantDemoSearchResult
 done
 ls -la shots

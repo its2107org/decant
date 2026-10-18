@@ -12,8 +12,33 @@ enum Demo {
     static var startTab: AppTab {
         if args.contains("-DecantDemoTasted") { return .tasted }
         if args.contains("-DecantDemoScan") || args.contains("-DecantDemoScanResult") { return .scan }
+        if args.contains("-DecantDemoSearch") { return .search }
         return .cellar
     }
+
+    /// Search results for the screenshots: Vinous's real answer, with made-up scores (signed out it has none).
+    static let searchResults: [[VinousSearch.Entry]] = {
+        guard isOn, args.contains("-DecantDemoSearch") else { return [] }
+        var entries = VinousSearch.entries(from: VinousFixtures.evesham2024)
+        let scores = ["93", "91", "92"]
+        for i in entries.indices {
+            entries[i].score = scores[i % scores.count]
+            entries[i].articleDate = "July 2026"
+        }
+        if var second = entries.last {
+            second.id += 1000
+            second.score = "90"
+            second.critic = "Josh Raynolds"
+            second.articleDate = "March 2026"
+            second.reviewDate = "2026-03-01"
+            entries.append(second)
+        }
+        return VinousSearch.grouped(entries)
+    }()
+
+    static var searchQuery: String { searchResults.isEmpty ? "" : "Evesham Wood 2024" }
+
+    static var openSearchResult: Bool { isOn && args.contains("-DecantDemoSearchResult") }
 
     static var startWithSettings: Bool { isOn && args.contains("-DecantDemoSettings") }
 
@@ -40,9 +65,15 @@ enum Demo {
         low: 165, high: 199, typical: 184, note: "")
 
     static let vinous = VinousReview(
-        found: true, signedIn: true, score: "96", critic: "Neal Martin", drinkWindow: "2027-2050",
+        found: true, signedIn: true, score: "95.5", critic: "Average of 2 reviews", drinkWindow: "2027-2050",
         note: "The 2019 Volnay Clos des Ducs has a beautifully defined bouquet of red cherries, crushed strawberry and rose petals.",
-        url: "")
+        url: "", vintage: "2019", pageWine: "2019 Volnay 1er Cru Clos des Ducs",
+        reviews: [
+            VinousReviewItem(score: "96", critic: "Neal Martin", date: "January 2022", drinkWindow: "2027-2050",
+                             note: "The 2019 Volnay Clos des Ducs has a beautifully defined bouquet of red cherries, crushed strawberry and rose petals."),
+            VinousReviewItem(score: "94-96", critic: "Neal Martin", date: "January 2021", drinkWindow: "2025-2045",
+                             note: "Tasted from barrel, the 2019 Clos des Ducs is pure and precise.")
+        ])
 
     static func container() -> ModelContainer {
         let container = try! ModelContainer(for: Wine.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))

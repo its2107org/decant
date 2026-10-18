@@ -85,6 +85,15 @@ struct PriceReport: Codable, Equatable {
 }
 
 /// A Vinous review as shown on Vinous to a signed-in subscriber.
+/// One critic's review of one wine and vintage.
+struct VinousReviewItem: Codable, Equatable, Hashable {
+    var score: String
+    var critic: String
+    var date: String
+    var drinkWindow: String
+    var note: String
+}
+
 struct VinousReview: Codable, Equatable {
     var found: Bool
     var signedIn: Bool
@@ -97,6 +106,17 @@ struct VinousReview: Codable, Equatable {
     var vintage: String = ""
     /// The wine as Vinous names it, e.g. "2019 Pinot Noir Eola-Amity Hills Cuvée".
     var pageWine: String = ""
+    /// Every review of this exact wine and vintage, newest first. With more than one, `score` is their average.
+    var reviews: [VinousReviewItem] = []
+
+    /// The average of several scores, e.g. "93" or "93.5"; "92-94" counts as 93.
+    static func average(_ scores: [String]) -> String {
+        let values = scores.compactMap { Wine.scoreValue($0) }
+        guard !values.isEmpty else { return "" }
+        if values.count == 1 { return scores.first { Wine.scoreValue($0) != nil } ?? "" }
+        let mean = (values.reduce(0, +) / Double(values.count) * 10).rounded() / 10
+        return mean == mean.rounded() ? String(Int(mean)) : String(format: "%.1f", mean)
+    }
 
     func isSameVintage(as wine: WineDetails) -> Bool {
         guard let v = wine.vintage else { return vintage.isEmpty || vintage.uppercased() == "NV" }

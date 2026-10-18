@@ -256,25 +256,13 @@ struct ScanResultView: View {
                 Text(message).font(.footnote).foregroundStyle(.red)
             case .done(let review):
                 if review.found {
-                    HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Text(review.score)
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
-                            .foregroundStyle(Color.accentColor)
-                        VStack(alignment: .leading, spacing: 2) {
-                            if !review.critic.isEmpty { Text(review.critic).font(.subheadline.weight(.medium)) }
-                            if !review.drinkWindow.isEmpty {
-                                Text("Drink \(review.drinkWindow)").font(.subheadline).foregroundStyle(.secondary)
-                            }
-                        }
-                    }
+                    VinousScoreView(score: review.score, critic: review.critic, drinkWindow: review.drinkWindow,
+                                    note: review.note, reviews: review.reviews)
                     if !review.isSameVintage(as: d) {
                         Label("This score is for the \(review.vintage). Vinous hasn't reviewed the \(d.vintage.map(String.init) ?? "NV") yet.",
                               systemImage: "info.circle")
                             .font(.footnote)
                             .foregroundStyle(.orange)
-                    }
-                    if !review.note.isEmpty {
-                        Text(review.note).font(.callout).foregroundStyle(.secondary)
                     }
                 } else if !review.signedIn || !Vinous.rememberedSignIn {
                     Text("Sign in to Vinous in Settings to see scores.").foregroundStyle(.secondary)

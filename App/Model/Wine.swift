@@ -76,6 +76,7 @@ final class Wine {
     var nycLow: Double?
     var nycHigh: Double?
     var nycTypical: Double?
+    var vinousReviewsData: Data?
     var nycOffersData: Data?
     var nycCheckedAt: Date?
 
@@ -118,11 +119,16 @@ final class Wine {
         set { nycOffersData = try? JSONEncoder().encode(newValue) }
     }
 
+    var vinousReviews: [VinousReviewItem] {
+        get { vinousReviewsData.flatMap { try? JSONDecoder().decode([VinousReviewItem].self, from: $0) } ?? [] }
+        set { vinousReviewsData = newValue.isEmpty ? nil : try? JSONEncoder().encode(newValue) }
+    }
+
     /// The best single number for sorting by Vinous score ("92-94" sorts as 93).
     var vinousSortValue: Double? { Wine.scoreValue(vinousScore) }
 
     static func scoreValue(_ text: String) -> Double? {
-        let numbers = text.split(whereSeparator: { !$0.isNumber }).compactMap { Double($0) }.filter { $0 >= 50 && $0 <= 100 }
+        let numbers = text.split(whereSeparator: { !$0.isNumber && $0 != "." }).compactMap { Double($0) }.filter { $0 >= 50 && $0 <= 100 }
         guard !numbers.isEmpty else { return nil }
         return numbers.reduce(0, +) / Double(numbers.count)
     }
@@ -165,6 +171,7 @@ final class Wine {
         vinousNote = v.note
         vinousURL = v.url
         vinousVintage = v.vintage
+        vinousReviews = v.reviews
         vinousCheckedAt = Date()
     }
 
@@ -176,6 +183,7 @@ final class Wine {
         vinousNote = ""
         vinousURL = ""
         vinousVintage = ""
+        vinousReviews = []
         vinousCheckedAt = Date()
     }
 
@@ -207,6 +215,7 @@ final class Wine {
         w.nycLow = nycLow
         w.nycHigh = nycHigh
         w.nycTypical = nycTypical
+        w.vinousReviewsData = vinousReviewsData
         w.nycOffersData = nycOffersData
         w.nycCheckedAt = nycCheckedAt
         w.labelPhoto = labelPhoto

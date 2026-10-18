@@ -141,25 +141,13 @@ struct WineDetailView: View {
     private var vinousCard: some View {
         Card(title: "Vinous", systemImage: "rosette") {
             if !wine.vinousScore.isEmpty {
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text(wine.vinousScore)
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.accentColor)
-                    VStack(alignment: .leading, spacing: 2) {
-                        if !wine.vinousCritic.isEmpty { Text(wine.vinousCritic).font(.subheadline.weight(.medium)) }
-                        if !wine.vinousDrinkWindow.isEmpty {
-                            Text("Drink \(wine.vinousDrinkWindow)").font(.subheadline).foregroundStyle(.secondary)
-                        }
-                    }
-                }
+                VinousScoreView(score: wine.vinousScore, critic: wine.vinousCritic, drinkWindow: wine.vinousDrinkWindow,
+                                note: wine.vinousNote, reviews: wine.vinousReviews)
                 if wine.vinousIsOtherVintage {
                     Label("This score is for the \(wine.vinousVintage). Vinous hasn't reviewed the \(wine.vintageText) yet.",
                           systemImage: "info.circle")
                         .font(.footnote)
                         .foregroundStyle(.orange)
-                }
-                if !wine.vinousNote.isEmpty {
-                    Text(wine.vinousNote).font(.callout).foregroundStyle(.secondary)
                 }
             } else if !checkingVinous {
                 Text(wine.vinousCheckedAt == nil ? "Not looked up yet." : "Vinous hasn't reviewed the \(wine.vintageText) yet.")

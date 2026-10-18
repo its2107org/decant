@@ -133,6 +133,38 @@ enum SelfTest {
         check("vinous search page link", Vinous.searchURL(for: evesham).absoluteString.contains("term=Evesham%20Wood%20Willamette"),
               Vinous.searchURL(for: evesham).absoluteString)
 
+        // 3d. Several reviews of one wine: all listed, average as the score. Search tab helpers.
+        check("average of scores", VinousReview.average(["93", "91"]) == "92" && VinousReview.average(["96", "94-96"]) == "95.5"
+              && VinousReview.average(["92+"]) == "92+" && VinousReview.average([]).isEmpty,
+              VinousReview.average(["96", "94-96"]))
+        if let first = eveshamResults.last {
+            var a = first; a.score = "93"; a.critic = "Eric Guido"; a.reviewDate = "2026-07-14"; a.articleDate = "July 2026"
+            var b = first; b.id += 1; b.score = "90"; b.critic = "Josh Raynolds"; b.reviewDate = "2025-03-01"; b.articleDate = "March 2025"
+            let both = VinousSearch.combined([b, a], signedIn: true)
+            check("all reviews listed with average", both?.reviews.count == 2 && both?.score == "91.5"
+                  && both?.reviews.first?.critic == "Eric Guido" && both?.critic == "Average of 2 reviews",
+                  "\(both?.score ?? "") \(both?.reviews.count ?? 0)")
+            check("one review stays as it is", VinousSearch.combined([a], signedIn: true)?.score == "93"
+                  && VinousSearch.combined([a], signedIn: true)?.reviews.isEmpty == true)
+            check("same review twice counted once", VinousSearch.combined([a, a], signedIn: true)?.reviews.isEmpty == true)
+            check("results grouped per wine", VinousSearch.grouped(eveshamResults + [b]).count == 3)
+            let w = Wine(status: .cellar)
+            w.apply(first.details)
+            if let both { w.applyVinous(both) }
+            check("reviews saved with the wine", w.vinousReviews.count == 2 && w.listVinousScore == "91.5" && w.producer == "Evesham Wood"
+                  && w.vintage == 2024 && w.appellation == "Willamette Valley")
+        }
+        let page = Vinous.review(from: [VinousReviewItem(score: "94", critic: "A", date: "", drinkWindow: "", note: ""),
+                                        VinousReviewItem(score: "00", critic: "B", date: "", drinkWindow: "", note: ""),
+                                        VinousReviewItem(score: "92", critic: "C", date: "", drinkWindow: "", note: "")],
+                                 pageWine: "", vintage: "2018", signedIn: true, usable: true)
+        check("page reviews averaged, hidden score skipped", page.found && page.score == "93" && page.reviews.count == 2, page.score)
+        check("year split from search", VinousSearch.splitYear("evesham wood 2024").term == "evesham wood"
+              && VinousSearch.splitYear("evesham wood 2024").vintage == 2024 && VinousSearch.splitYear("monte bello").vintage == nil)
+        if let monte = ridge.first {
+            check("grapes without percentages", monte.details.grapes.first == "Cabernet Sauvignon", monte.details.grapes.joined(separator: ","))
+        }
+
         // 4. The label schema is a valid structured-output schema shape.
         let required = LabelReader.schema["required"] as? [String] ?? []
         let properties = (LabelReader.schema["properties"] as? [String: Any])?.keys.sorted() ?? []
