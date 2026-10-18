@@ -1,22 +1,13 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 const cases = [
-  ['Evesham Wood Willamette Valley Pinot Noir', 2024],
-  ['Evesham Wood Pinot Noir', 2024],
+  ['Lopez de Heredia', 2012],
+  ['Tondonia', 2012],
+  ['Bollinger Special Cuvee', 0],
+  ['Krug Grande Cuvee', 0],
+  ['Domaine Leflaive', 2019],
   ['Evesham Wood', 2024],
-  ['Evesham Wood Willamette Valley Pinot Noir', 2019],
-  ['Ridge Vineyards Monte Bello', 2018],
   ['Ridge Monte Bello', 2018],
-  ['Chateau Margaux', 2015],
-  ['Château Margaux Grand Vin', 2015],
-  ['Domaine Leflaive Puligny-Montrachet Les Pucelles', 2019],
-  ['Produttori del Barbaresco Barbaresco', 2019],
-  ['Lopez de Heredia Vina Tondonia Reserva', 2012],
-  ['R. Lopez de Heredia Viña Tondonia Reserva Tinto', 2012],
-  ['Bollinger Special Cuvee', null],
-  ['Domaine Tempier Bandol Rose', 2024],
-  ['Felsina Chianti Classico Riserva Rancia', 2020],
-  ['Evesham Wood Pinot Noir Willamette Valley', null],
 ];
 fs.mkdirSync('out', { recursive: true });
 const browser = await chromium.launch();
@@ -36,5 +27,12 @@ for (const [term, vintage] of cases) {
 }
 // Also: plain fetch from Node, no browser
 try { const res = await fetch('https://vinous.com/api/v2/wines?term=Evesham+Wood&vintage=2024&page=1&per_page=5'); out.push({ node: res.status, body: (await res.text()).slice(0, 300) }); } catch (e) { out.push({ node: String(e) }); }
+for (const [t,v] of [['Evesham Wood',2024],['Ridge Monte Bello',2018]]) {
+  const b = await page.evaluate(async ([t,v]) => (await fetch('/api/v2/wines?' + new URLSearchParams({term:t, vintage:v, page:'1', per_page:'25'}))).text(), [t,v]);
+  fs.writeFileSync('out/raw-' + t.replace(/ /g,'_') + '.json', b);
+}
+await page.goto('https://vinous.com/wines/evesham-wood-2024-pinot-noir-willamette-valley', { waitUntil: 'domcontentloaded', timeout: 60000 });
+await page.waitForTimeout(6000);
+fs.writeFileSync('out/winepage.txt', page.url() + '\n\n' + await page.evaluate(() => document.body.innerText));
 fs.writeFileSync('out/api.json', JSON.stringify(out, null, 1));
 await browser.close();
