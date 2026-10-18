@@ -280,7 +280,7 @@ struct ScanResultView: View {
                     Text("Sign in to Vinous in Settings to see scores.").foregroundStyle(.secondary)
                     Button("Open Settings") { app.showSettings = true }.buttonStyle(.bordered)
                 } else {
-                    Text("Vinous hasn't reviewed this wine.").foregroundStyle(.secondary)
+                    Text("Vinous hasn't reviewed the \(d.vintage.map(String.init) ?? "NV") yet.").foregroundStyle(.secondary)
                 }
             }
             if !lookup.vinous.isWorking {

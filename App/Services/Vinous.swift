@@ -51,7 +51,7 @@ enum Vinous {
     Matching rules (strict):
     - Same producer AND the same wine: the same cuvée, vineyard, appellation or AVA designation and colour.
     - A producer's other wines are different wines, even with the same grape. For example "Willamette Valley Pinot Noir" and "Pinot Noir Eola-Amity Hills Cuvée" are different wines; so are a "Reserve", a single-vineyard bottling, a second wine or a different appellation.
-    - Different vintages of the same wine count as the same wine.
+    - The vintage must match exactly. Another vintage of the same wine does not count.
     """
 
     /// Reads the score from a Vinous page's text. With `trustPage`, Ian chose the page himself,
@@ -63,7 +63,7 @@ enum Vinous {
         - sameWine: true only if the page is for the wine described. \(matchingRules)
         - signedIn: false if the page asks to sign in or subscribe instead of showing reviews.
         - vintage: the vintage of the review you report, e.g. "2022" or "NV".
-        - score: as printed, e.g. "94" or "92-94". Use the review of the described vintage if there is one, otherwise the most recent review on the page. Empty if none.
+        - score: as printed, e.g. "94" or "92-94", from a review of exactly the described vintage. Empty if the page has no review of that vintage.
         - critic: the reviewer's name. drinkWindow: as printed, e.g. "2025-2040". Empty if missing.
         - note: the first two sentences of that tasting note, word for word. Empty if missing.
         """
@@ -90,10 +90,17 @@ enum Vinous {
         let e = try await Claude.structured(Extracted.self, model: Claude.sonnet, system: system,
                                             content: [["type": "text", "text": prompt]], schema: schema,
                                             effort: "low", maxTokens: 6000)
-        let usable = !e.score.isEmpty && (e.sameWine || trustPage)
-        return VinousReview(found: usable, signedIn: e.signedIn, score: usable ? e.score : "",
-                            critic: usable ? e.critic : "", drinkWindow: usable ? e.drinkWindow : "",
-                            note: usable ? e.note : "", url: "", vintage: e.vintage, pageWine: e.pageWine)
+        var review = VinousReview(found: false, signedIn: e.signedIn, score: "", critic: "", drinkWindow: "",
+                                  note: "", url: "", vintage: e.vintage, pageWine: e.pageWine)
+        let usable = !e.score.isEmpty && (trustPage || (e.sameWine && review.isSameVintage(as: wine)))
+        if usable {
+            review.found = true
+            review.score = e.score
+            review.critic = e.critic
+            review.drinkWindow = e.drinkWindow
+            review.note = e.note
+        }
+        return review
     }
 
     /// Finds the wine's own page on Vinous with a web search limited to vinous.com.
@@ -102,8 +109,7 @@ enum Vinous {
         let system = """
         Find the Vinous (vinous.com) wine page for the wine described. Wine pages look like https://vinous.com/wines/<name>.
         \(matchingRules)
-        Prefer the page for the exact vintage. If that vintage has no page, use the most recent vintage of the same wine.
-        If Vinous has no page for this exact wine, return an empty url; never return a different wine from the same producer.
+        Only return the page for the exact vintage. If Vinous has no page for this exact wine and vintage, return an empty url; never return another vintage or a different wine from the same producer.
         Finish your answer with only this JSON object: {"url":""}
         """
         let found = try await Claude.searchThenAnswer(Found.self, system: system,

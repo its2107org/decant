@@ -162,7 +162,7 @@ struct WineDetailView: View {
                     Text(wine.vinousNote).font(.callout).foregroundStyle(.secondary)
                 }
             } else if !checkingVinous {
-                Text(wine.vinousCheckedAt == nil ? "Not looked up yet." : "Vinous hasn't reviewed this wine.")
+                Text(wine.vinousCheckedAt == nil ? "Not looked up yet." : "Vinous hasn't reviewed the \(wine.vintageText) yet.")
                     .foregroundStyle(.secondary)
             }
             HStack {
