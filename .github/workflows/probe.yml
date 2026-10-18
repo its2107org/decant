@@ -17,7 +17,7 @@ jobs:
           npm init -y >/dev/null
           npm i playwright@1.55.0 >/dev/null
           npx playwright install --with-deps chromium >/dev/null
-          node vinous.mjs || true
+          node api.mjs || true
       - name: Publish
         if: always()
         run: |
