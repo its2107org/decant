@@ -26,7 +26,7 @@ jobs:
       - name: Build, run and screenshot
         run: scripts/simulator-check.sh
       - name: Publish screenshots to the screenshots branch
-        if: always() && github.ref == 'refs/heads/main'
+        if: always()
         run: |
           set -e
           [ -d shots ] || exit 0
