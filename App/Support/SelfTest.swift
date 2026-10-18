@@ -68,6 +68,71 @@ enum SelfTest {
             check("description names the wine", details.fullDescription.contains("Santa Cruz Mountains"))
         }
 
+        // 3c. Vinous search: real answers from Vinous, matched to bottles.
+        func bottle(_ producer: String, _ name: String, _ vintage: Int?) -> WineDetails {
+            WineDetails(identified: true, producer: producer, name: name, vintage: vintage, style: "red", grapes: [],
+                        country: "", region: "", subregion: "", appellation: "", classification: "", abv: nil,
+                        bottleSizeML: nil, labelText: "")
+        }
+        let evesham = bottle("Evesham Wood", "Willamette Valley Pinot Noir", 2024)
+        let eveshamResults = VinousSearch.entries(from: VinousFixtures.evesham2024)
+        check("vinous results read", eveshamResults.count == 3, "\(eveshamResults.count)")
+        let eveshamMatch = VinousSearch.exactMatches(eveshamResults, wine: evesham)
+        check("evesham 2024 matched", eveshamMatch.count == 1 && eveshamMatch.first?.slug == "evesham-wood-2024-pinot-noir-willamette-valley",
+              eveshamMatch.map(\.slug).joined(separator: ","))
+        if let e = VinousSearch.bestReview(eveshamMatch) {
+            let r = e.review(signedIn: false)
+            check("evesham review details", r.critic == "Eric Guido" && r.drinkWindow == "2026-2030" && r.vintage == "2024"
+                  && r.url == "https://vinous.com/wines/evesham-wood-2024-pinot-noir-willamette-valley" && !r.found,
+                  "\(r.critic) \(r.drinkWindow) \(r.vintage) \(r.url) \(r.found)")
+        } else {
+            check("evesham review details", false)
+        }
+        check("evesham search terms", VinousSearch.terms(for: evesham) == ["Evesham Wood Willamette Valley Pinot Noir", "Evesham Wood", "Willamette Valley Pinot Noir"],
+              VinousSearch.terms(for: evesham).joined(separator: " | "))
+        check("other evesham wines not matched",
+              VinousSearch.exactMatches(eveshamResults, wine: bottle("Evesham Wood", "Pinot Noir", 2024)).isEmpty)
+        check("evesham vineyard is the same producer",
+              VinousSearch.key(producer: "Evesham Wood Vineyard", wine: "Pinot Noir Willamette Valley") == eveshamMatch.first?.key)
+
+        let ridge = VinousSearch.entries(from: VinousFixtures.ridge2018)
+        let monteBello = VinousSearch.exactMatches(ridge, wine: bottle("Ridge", "Monte Bello", 2018))
+        check("ridge monte bello, not the chardonnay", monteBello.count == 3 && !monteBello.contains { $0.wine.contains("Chardonnay") },
+              monteBello.map(\.wine).joined(separator: ","))
+        check("ridge full name matches too", VinousSearch.exactMatches(ridge, wine: bottle("Ridge Vineyards", "Monte Bello", 2018)).count == 3)
+
+        let margaux = VinousSearch.key(producer: "Château Margaux", wine: "Château Margaux")
+        check("margaux grand vin", VinousSearch.key(producer: "Chateau Margaux", wine: "") == margaux
+              && VinousSearch.key(producer: "Château Margaux", wine: "Grand Vin") == margaux
+              && VinousSearch.key(producer: "Château Margaux", wine: "Pavillon Rouge de Margaux") != margaux)
+
+        let bollinger = VinousSearch.entries(from: VinousFixtures.bollingerNV)
+        let special = VinousSearch.exactMatches(bollinger, wine: bottle("Bollinger", "Special Cuvée Brut", nil))
+        check("bollinger NV spellings", special.count >= 5 && !special.contains { $0.wine.contains("007") } && special.allSatisfy { $0.vintage == 0 },
+              special.map(\.wine).joined(separator: ","))
+        check("NV review label", special.first?.review(signedIn: true).vintage == "NV")
+
+        let lopez = bottle("R. López de Heredia", "Viña Tondonia Reserva", 2012)
+        let lopezTerms = VinousSearch.terms(for: lopez)
+        check("short search when a label word is missing", lopezTerms.contains("López de Heredia") && lopezTerms.first == "R. López de Heredia Viña Tondonia Reserva",
+              lopezTerms.joined(separator: " | "))
+        check("lopez left for Claude to decide", VinousSearch.exactMatches(VinousSearch.entries(from: VinousFixtures.lopez2012), wine: lopez).isEmpty)
+        let leflaive = VinousSearch.entries(from: VinousFixtures.leflaive2019)
+        check("leflaive left for Claude to decide",
+              VinousSearch.exactMatches(leflaive, wine: bottle("Domaine Leflaive", "Puligny-Montrachet Les Pucelles 1er Cru", 2019)).isEmpty
+              && leflaive.count >= 10)
+
+        check("vinous scores", VinousSearch.scoreText(NSNumber(value: 92)) == "92" && VinousSearch.scoreText("92-94") == "92-94"
+              && VinousSearch.scoreText("00").isEmpty && VinousSearch.scoreText(NSNumber(value: 0)).isEmpty && VinousSearch.scoreText(nil).isEmpty)
+        if let first = eveshamResults.first {
+            var newer = first; newer.score = "93"; newer.reviewDate = "2026-08-01"
+            var older = first; older.score = "91"; older.reviewDate = "2025-01-01"
+            var unscored = first; unscored.score = ""; unscored.reviewDate = "2026-09-01"
+            check("newest scored review", VinousSearch.bestReview([older, unscored, newer])?.score == "93")
+        }
+        check("vinous search page link", Vinous.searchURL(for: evesham).absoluteString.contains("term=Evesham%20Wood%20Willamette"),
+              Vinous.searchURL(for: evesham).absoluteString)
+
         // 4. The label schema is a valid structured-output schema shape.
         let required = LabelReader.schema["required"] as? [String] ?? []
         let properties = (LabelReader.schema["properties"] as? [String: Any])?.keys.sorted() ?? []

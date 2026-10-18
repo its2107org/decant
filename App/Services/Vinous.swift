@@ -1,11 +1,19 @@
 import Foundation
 import WebKit
 
+enum VinousError: LocalizedError {
+    case searchFailed(Int)
+    var errorDescription: String? {
+        if case .searchFailed(let status) = self { return "Vinous search didn't answer (error \(status)). Try again shortly." }
+        return nil
+    }
+}
+
 /// Looks wines up on Vinous using Ian's own signed-in Vinous account.
 ///
 /// Vinous has no public way for apps to read scores, so Decant does what Ian would do by hand:
-/// it opens the wine's Vinous page in a hidden browser that shares his Vinous sign-in, reads the
-/// page, and picks out the score. One wine at a time, only when he asks.
+/// it searches Vinous with his sign-in, picks the exact wine and vintage from the results, and
+/// if the score isn't in the results it reads that wine's page in a hidden browser.
 @MainActor
 enum Vinous {
     static let signInURL = URL(string: "https://vinous.com/users/sign_in")!
@@ -36,15 +44,119 @@ enum Vinous {
 
     // MARK: - Lookup
 
+    /// Finds the wine with Vinous's own search (the same one behind the search box on vinous.com),
+    /// keeps only reviews of the bottle's exact vintage, and picks the entry for this exact wine.
     static func lookup(_ wine: WineDetails) async throws -> VinousReview {
-        let notFound = VinousReview(found: false, signedIn: rememberedSignIn, score: "", critic: "",
-                                    drinkWindow: "", note: "", url: "")
-        guard let page = try await findPage(wine) else { return notFound }
-        let text = try await PageReader.text(of: page)
-        var review = try await extract(from: text, wine: wine, trustPage: false)
-        review.url = page.absoluteString
-        rememberedSignIn = review.signedIn
+        let signedIn = await sessionIsSignedIn()
+        let notFound = VinousReview(found: false, signedIn: signedIn || rememberedSignIn, score: "", critic: "",
+                                    drinkWindow: "", note: "", url: searchURL(for: wine).absoluteString)
+        let vintage = wine.vintage ?? 0
+        var candidates: [VinousSearch.Entry] = []
+        for term in VinousSearch.terms(for: wine) {
+            let found = try await search(term: term, vintage: vintage)
+            for entry in found where entry.vintage == vintage && !candidates.contains(where: { $0.id == entry.id }) {
+                candidates.append(entry)
+            }
+            if !VinousSearch.exactMatches(candidates, wine: wine).isEmpty { break }
+        }
+        if signedIn { rememberedSignIn = true }
+        guard !candidates.isEmpty else { return notFound }
+
+        var chosen = VinousSearch.exactMatches(candidates, wine: wine)
+        if chosen.isEmpty {
+            chosen = try await pick(from: candidates, wine: wine)
+        }
+        guard let entry = VinousSearch.bestReview(chosen) else { return notFound }
+        var review = entry.review(signedIn: signedIn || rememberedSignIn)
+        if review.score.isEmpty, let page = URL(string: review.url) {
+            // The search gave the right page but not the score; read the page itself with Ian's sign-in.
+            let text = try await PageReader.text(of: page)
+            var fromPage = try await extract(from: text, wine: wine, trustPage: true)
+            if fromPage.signedIn { rememberedSignIn = true }
+            if fromPage.found {
+                fromPage.url = review.url
+                if fromPage.drinkWindow.isEmpty { fromPage.drinkWindow = review.drinkWindow }
+                if fromPage.critic.isEmpty { fromPage.critic = review.critic }
+                fromPage.vintage = review.vintage
+                fromPage.pageWine = review.pageWine
+                return fromPage
+            }
+            review.signedIn = fromPage.signedIn
+        }
         return review
+    }
+
+    /// Vinous's search page for this wine, for "Open on Vinous" when there's no review yet.
+    static func searchURL(for wine: WineDetails) -> URL {
+        var c = URLComponents(string: "https://vinous.com/wines")!
+        c.queryItems = [URLQueryItem(name: "filters", value: ""),
+                        URLQueryItem(name: "term", value: VinousSearch.terms(for: wine).first ?? wine.producer),
+                        URLQueryItem(name: "page", value: "1")]
+        return c.url ?? searchURL
+    }
+
+    private static func search(term: String, vintage: Int) async throws -> [VinousSearch.Entry] {
+        let (data, status) = try await get("/api/v2/wines", [
+            URLQueryItem(name: "term", value: term),
+            URLQueryItem(name: "vintage", value: String(vintage)),
+            URLQueryItem(name: "order", value: ""),
+            URLQueryItem(name: "order_type", value: "desc"),
+            URLQueryItem(name: "page", value: "1"),
+            URLQueryItem(name: "per_page", value: "100")
+        ])
+        guard status == 200 else { throw VinousError.searchFailed(status) }
+        return VinousSearch.entries(from: data)
+    }
+
+    private static func sessionIsSignedIn() async -> Bool {
+        (try? await get("/api/v2/sessions/current", []))?.1 == 200
+    }
+
+    /// Calls Vinous with the sign-in Ian made in Decant's Vinous browser.
+    private static func get(_ path: String, _ query: [URLQueryItem]) async throws -> (Data, Int) {
+        var c = URLComponents(string: "https://vinous.com" + path)!
+        if !query.isEmpty { c.queryItems = query }
+        var request = URLRequest(url: c.url!, timeoutInterval: 30)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        let cookies = await WKWebsiteDataStore.default().httpCookieStore.allCookies()
+            .filter { $0.domain.hasSuffix("vinous.com") }
+        for (field, value) in HTTPCookie.requestHeaderFields(with: cookies) {
+            request.setValue(value, forHTTPHeaderField: field)
+        }
+        request.httpShouldHandleCookies = false
+        let (data, response) = try await URLSession.shared.data(for: request)
+        return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
+    }
+
+    /// Asks Claude which search result is the bottle, when the names don't line up word for word.
+    private static func pick(from candidates: [VinousSearch.Entry], wine: WineDetails) async throws -> [VinousSearch.Entry] {
+        var groups: [[VinousSearch.Entry]] = []
+        for entry in candidates {
+            if let i = groups.firstIndex(where: { $0[0].key == entry.key }) { groups[i].append(entry) } else { groups.append([entry]) }
+        }
+        let list = groups.prefix(60).enumerated().map { i, group in
+            let e = group[0]
+            return "\(i). Producer: \(e.producer) | Wine: \(e.wine) | Region: \(e.region) | Colour: \(e.color) | Grapes: \(e.grapes)"
+        }.joined(separator: "\n")
+        let system = """
+        You match a wine bottle to Vinous (vinous.com) search results. All results are already the right vintage.
+        \(matchingRules)
+        - Producer names may be written differently (e.g. "R. López de Heredia" and "Lopez de Heredia", or "Evesham Wood Vineyard" and "Evesham Wood"). Vinous sometimes adds a first name or "Vineyard" to the same producer, but separate houses sharing a family name are different producers (e.g. Domaine Leflaive and Maison Olivier Leflaive).
+        - Word order and accents don't matter. Words such as "Tinto", "Grand Vin" or "Brut" on a label may be missing from Vinous's name.
+        Answer with the number of the result that is this exact wine, or -1 if none is.
+        """
+        let schema: [String: Any] = [
+            "type": "object",
+            "properties": ["choice": ["type": "integer"]],
+            "required": ["choice"],
+            "additionalProperties": false
+        ]
+        struct Choice: Decodable { var choice: Int }
+        let answer = try await Claude.structured(Choice.self, model: Claude.sonnet, system: system,
+                                                 content: [["type": "text", "text": "The bottle:\n\(wine.fullDescription)\n\nResults:\n\(list)"]],
+                                                 schema: schema, effort: "low", maxTokens: 2000)
+        guard groups.indices.contains(answer.choice), answer.choice < 60 else { return [] }
+        return groups[answer.choice]
     }
 
     private static let matchingRules = """
@@ -63,7 +175,8 @@ enum Vinous {
         - sameWine: true only if the page is for the wine described. \(matchingRules)
         - signedIn: false if the page asks to sign in or subscribe instead of showing reviews.
         - vintage: the vintage of the review you report, e.g. "2022" or "NV".
-        - score: as printed, e.g. "94" or "92-94", from a review of exactly the described vintage. Empty if the page has no review of that vintage.
+        - If the page lists several wines, use only the one that is the wine described.
+        - score: as printed, e.g. "94" or "92-94", from a review of exactly the described vintage. Empty if the page has no review of that vintage, or if the score is hidden (shown as "00" or behind "Subscriber Access Only").
         - critic: the reviewer's name. drinkWindow: as printed, e.g. "2025-2040". Empty if missing.
         - note: the first two sentences of that tasting note, word for word. Empty if missing.
         """
@@ -101,23 +214,6 @@ enum Vinous {
             review.note = e.note
         }
         return review
-    }
-
-    /// Finds the wine's own page on Vinous with a web search limited to vinous.com.
-    static func findPage(_ wine: WineDetails) async throws -> URL? {
-        struct Found: Decodable { var url: String }
-        let system = """
-        Find the Vinous (vinous.com) wine page for the wine described. Wine pages look like https://vinous.com/wines/<name>.
-        \(matchingRules)
-        Only return the page for the exact vintage. If Vinous has no page for this exact wine and vintage, return an empty url; never return another vintage or a different wine from the same producer.
-        Finish your answer with only this JSON object: {"url":""}
-        """
-        let found = try await Claude.searchThenAnswer(Found.self, system: system,
-                                                      prompt: "The wine:\n\(wine.fullDescription)",
-                                                      allowedDomains: ["vinous.com"], maxSearches: 4)
-        guard let url = URL(string: found.url), url.host()?.contains("vinous.com") == true,
-              url.path().hasPrefix("/wines/") else { return nil }
-        return url
     }
 }
 
