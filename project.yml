@@ -1,0 +1,64 @@
+name: Decant
+options:
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    # Replaced with the real Apple Team ID when building for TestFlight.
+    DEVELOPMENT_TEAM: DECANTDEV0
+    DECANT_BUNDLE_ID: com.$(DEVELOPMENT_TEAM).decant
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    CODE_SIGN_STYLE: Manual
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+targets:
+  Decant:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Decant
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: en-GB
+        ITSAppUsesNonExemptEncryption: false
+        LSApplicationCategoryType: public.app-category.food-and-drink
+        NSCameraUsageDescription: Decant uses the camera to photograph wine labels so it can look the wine up for you.
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        LSApplicationQueriesSchemes:
+          - vivino
+        CFBundleURLTypes:
+          - CFBundleURLName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            CFBundleURLSchemes:
+              - decant
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(DECANT_BUNDLE_ID)
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
+
+schemes:
+  Decant:
+    build:
+      targets:
+        Decant: all
+    run:
+      config: Debug
+    archive:
+      config: Release
