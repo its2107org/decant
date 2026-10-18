@@ -1,0 +1,26 @@
+name: Probe shops
+on:
+  push:
+    branches: ["claude/**"]
+    paths: ["probe/**", ".github/workflows/probe.yml"]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run
+        working-directory: probe
+        run: |
+          npm init -y >/dev/null
+          npm i playwright@1.55.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+          timeout 1500 node shops.mjs || true
+      - name: Publish
+        if: always()
+        run: |
+          git config user.name "decant-ci"; git config user.email "decant-ci@users.noreply.github.com"
+          cp -R probe/out /tmp/out
+          git checkout --orphan probe-tmp; git rm -rf --quiet . || true; git clean -fdxq
+          cp -R /tmp/out/* .; git add -A; git commit -qm "Probe ${GITHUB_SHA::7}"; git push -f origin HEAD:probe
