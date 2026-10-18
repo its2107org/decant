@@ -2,7 +2,7 @@ name: Check build and screenshots
 on:
   push:
     branches: ["**"]
-    paths-ignore: ["**.md"]
+    paths-ignore: ["**.md", "probe/**", ".github/workflows/probe.yml"]
   workflow_dispatch:
 
 concurrency:
