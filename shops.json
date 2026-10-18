@@ -1,0 +1,477 @@
+[
+ {
+  "name": "Astor Wines",
+  "domain": "astorwines.com",
+  "status": 200,
+  "url": "https://www.astorwines.com/",
+  "title": "Welcome to Astor Wines & Spirits",
+  "platform": [
+   "wix",
+   "cloudflare"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n    - lo",
+  "xhr": []
+ },
+ {
+  "name": "Flatiron Wines",
+  "domain": "flatiron-wines.com",
+  "status": 200,
+  "url": "https://flatiron-wines.com/",
+  "title": "Flatiron Wines & Spirits - Buy Wine Online, Delivery and Shipping – Flatiron Wines & Spirits - Home",
+  "platform": [
+   "shopify",
+   "captcha"
+  ],
+  "suggest": "200 []",
+  "searchURL": "https://flatiron-wines.com/search?options%5Bprefix%5D=last&q=Monte+Bello",
+  "priceLines": [],
+  "mentions": 1,
+  "xhr": [
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://fast.a.klaviyo.com/custom-fonts/api/v1/company-fonts/onsite?company_id=MhASwD",
+   "200 https://static-forms.klaviyo.com/forms/api/v7/MhASwD/full-forms",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://flatiron-wines.com/search/suggest.json?q=Monte%20Bello&resources[type]=product&resources[limit]=5",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://fast.a.klaviyo.com/custom-fonts/api/v1/company-fonts/onsite?company_id=MhASwD",
+   "200 https://static-forms.klaviyo.com/forms/api/v7/MhASwD/full-forms",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics"
+  ]
+ },
+ {
+  "name": "Mister Wright A",
+  "domain": "misterwrightfinewines.com",
+  "status": 403,
+  "url": "https://www.misterwrightfinewines.com/",
+  "title": "ERROR: The request could not be satisfied",
+  "platform": [],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "Mister Wright B",
+  "domain": "mrwrightwines.com",
+  "error": "Error: page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.mrwrightwines.com/\nCall log:\n  - navigating to \"https://www.mrwrightwines.com/\", waiting until \"domcontentloaded\"\n",
+  "xhr": []
+ },
+ {
+  "name": "Mister Wright C",
+  "domain": "misterwright.com",
+  "error": "Error: page.goto: net::ERR_CONNECTION_CLOSED at https://www.misterwright.com/\nCall log:\n  - navigating to \"https://www.misterwright.com/\", waiting until \"domcontentloaded\"\n",
+  "xhr": []
+ },
+ {
+  "name": "K&L",
+  "domain": "klwines.com",
+  "status": 403,
+  "url": "https://www.klwines.com/",
+  "title": "klwines.com",
+  "platform": [
+   "challenge-platform",
+   "captcha"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "Chambers Street",
+  "domain": "chambersstwines.com",
+  "status": 200,
+  "url": "https://chambersstwines.com/",
+  "title": "Chambers St Wines – Chambers Street Wines",
+  "platform": [
+   "shopify",
+   "cloudflare",
+   "captcha"
+  ],
+  "suggest": "200 [[\"Ridge 2020 Santa Cruz Mountains Monte Bello\",\"199.99\"],[\"Rhys 2014 Santa Cruz Mountains Pinot Noir Horseshoe Vineyard 500ml\",\"44.99\"],[\"Henriquez, Roberto 2024 Santa Cruz de Coya Pais\",\"29.99\"],[\"Domaine Eden 2021 Cabernet Sauvignon\",\"62.99\"]]",
+  "searchURL": "https://chambersstwines.com/",
+  "priceLines": [],
+  "mentions": 0,
+  "xhr": [
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://fast.a.klaviyo.com/custom-fonts/api/v1/company-fonts/onsite?company_id=SkdK9Z",
+   "200 https://static-forms.klaviyo.com/forms/api/v7/SkdK9Z/full-forms",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://chambersstwines.com/search/suggest.json?q=Monte%20Bello&resources[type]=product&resources[limit]=5"
+  ]
+ },
+ {
+  "name": "Sherry-Lehmann",
+  "domain": "sherry-lehmann.com",
+  "status": 200,
+  "url": "https://www.sherry-lehmann.com/",
+  "title": "Sherry-Lehmann | Wine, Spirits, Watches & Luxury Living",
+  "platform": [
+   "cloudflare"
+  ],
+  "searchURL": "https://www.sherry-lehmann.com/?s=Monte+Bello",
+  "priceLines": [],
+  "mentions": 1,
+  "xhr": []
+ },
+ {
+  "name": "Morrell",
+  "domain": "morrellwine.com",
+  "status": 200,
+  "url": "https://morrellwine.com/",
+  "title": "Morrell Fine Wine & Spirits Merchants",
+  "platform": [
+   "wix",
+   "cloudflare",
+   "captcha"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n    - lo",
+  "xhr": [
+   "200 https://morrellwine.com//api/v1/users/customer/current.json?api_key=7508df878a8c7566a880e4d3f7fa7972&sdk_guid=bfcaef43-59b1-7cc0-ddbc-558695c83fa0&ch_request_guid=b60ef128-0b4f-b7fd-91a6-ca4ecce825f0&",
+   "200 https://morrellwine.com//api/v1/merchants/667dd606c6f948361c10a851/browse_categories/render.json",
+   "200 https://morrellwine.com//api/v1/widget_stat.json",
+   "200 https://morrellwine.com//api/v1/merchants/667dd606c6f948361c10a851/carts/open_carts.json?api_key=7508df878a8c7566a880e4d3f7fa7972&sdk_guid=bfcaef43-59b1-7cc0-ddbc-558695c83fa0&ch_request_guid=9a025814",
+   "200 https://morrellwine.com//api/v1/merchants/667dd606c6f948361c10a851/browse_categories/render.json",
+   "200 https://morrellwine.com//api/v1/merchants/667dd606c6f948361c10a851/browse_categories/render.json",
+   "200 https://morrellwine.com//api/v1/merchants/667dd606c6f948361c10a851/browse_categories/render.json",
+   "200 https://morrellwine.com//api/v1/merchants/667dd606c6f948361c10a851/browse_categories/render.json",
+   "200 https://morrellwine.com//api/v1/merchants/667dd606c6f948361c10a851/browse_categories/render.json",
+   "200 https://morrellwine.com//api/v1/widget_stat.json",
+   "200 https://morrellwine.com//api/v1/widget_stat.json",
+   "200 https://xd-f1cf3d4fdb19408ea770fc6f80817dcb.ecs.us-east-1.on.aws/events?cee=no",
+   "200 https://morrellwine.com//api/v1/merchants/667dd606c6f948361c10a851/browse_categories/render.json",
+   "200 https://morrellwine.com//api/v1/widget_stat.json"
+  ]
+ },
+ {
+  "name": "Crush",
+  "domain": "crushwineco.com",
+  "status": 200,
+  "url": "https://crushwineco.com/",
+  "title": "Crush® Wine & Spirits – Crush Wine & Spirits",
+  "platform": [
+   "shopify",
+   "captcha"
+  ],
+  "suggest": "200 [[\"2018 Ridge Monte Bello Cabernet Sauvignon\",\"259.95\"],[\"2019 Bea, Paolo Montefalco Rosso Riserva Vigneto Pipparello\",\"84.95\"]]",
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n    - lo",
+  "xhr": [
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://crushwineco.com/cart.json",
+   "200 https://api64.ipify.org/?format=json",
+   "200 https://api.ipify.org/?format=json",
+   "200 https://crushwineco.com/cart.json",
+   "200 https://justviewed.prezenapps.com/public/store_test?shop_name=crushwine.myshopify.com&current_url=https%3A%2F%2Fcrushwineco.com%2F&file_name=recent-app.js&comment=recent-app.js+file+code+called&app_ve",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "201 https://transaction-watcher-2.littledata.io/clientID/shopify",
+   "200 https://crushwineco.com/search/suggest.json?q=Monte%20Bello&resources[type]=product&resources[limit]=5",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics"
+  ]
+ },
+ {
+  "name": "Union Square Wines",
+  "domain": "unionsquarewines.com",
+  "status": 403,
+  "url": "https://www.unionsquarewines.com/",
+  "title": "ERROR: The request could not be satisfied",
+  "platform": [],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "Garnet",
+  "domain": "garnetwine.com",
+  "status": 403,
+  "url": "https://www.garnetwine.com/",
+  "title": "garnetwine.com",
+  "platform": [
+   "captcha"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "67 Wine",
+  "domain": "67wine.com",
+  "status": 200,
+  "url": "https://67wine.com/",
+  "title": "Premier Wine & Spirits Shop since 1941. – 67",
+  "platform": [
+   "shopify",
+   "cloudflare",
+   "captcha"
+  ],
+  "suggest": "200 [[\"La Valentina Bellovedere Montepulciano d'Abruzzo Terre dei Vestini Riserva 2020 750ml\",\"65.00\"],[\"Cantina Zaccagnini MONTEPULCIANO d'Abruzzo 2023 750ml\",\"19.99\"],[\"Cora Montepulciano d'Abruzzo 2024 750ml\",\"10.99\"],[\"VALLE REALE MONTEPULCIANO D'ABRUZZO VIGNETO SANT'EUSANIO KOSH 2020\",\"34.01\"],[\"La Fiera Montepulciano d'Abruzzo 2023 750ml\",\"13.99\"]]",
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n    - lo",
+  "xhr": [
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://67wine.com/apps/tm-widget/api/storeapi/authv2",
+   "200 https://67gourmet.myshopify.com/api/2026-07/graphql.json",
+   "200 https://67gourmet.myshopify.com/api/2026-07/graphql.json",
+   "200 https://67gourmet.myshopify.com/api/2026-07/graphql.json",
+   "200 https://mahina.app/app/67gourmet.myshopify.com",
+   "200 https://67gourmet.myshopify.com/api/2026-04/graphql.json?skipListener=true",
+   "200 https://67wine.com/apps/otmacessiblyapp/widget/settings",
+   "200 https://www.googleadservices.com/pagead/conversion/1041141931/?random=1792298560470&cv=11&fst=1792298560470&fmt=7&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45be6ae1h1v9187842356za200zd9187842356xecxf",
+   "200 https://maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true",
+   "200 https://appsolve.io/bundle/api/v2/sf/prs/69417894171/en/1792281737.json",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://maps.googleapis.com/$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService/GetViewportInfo",
+   "200 https://maps.googleapis.com/$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService/GetViewportInfo",
+   "200 https://maps.googleapis.com/$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService/GetViewportInfo"
+  ]
+ },
+ {
+  "name": "Acker",
+  "domain": "ackerwines.com",
+  "status": 403,
+  "url": "https://www.ackerwines.com/",
+  "title": "Just a moment...",
+  "platform": [
+   "cloudflare",
+   "challenge-platform"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "Burgundy Wine Co",
+  "domain": "burgundywinecompany.com",
+  "status": 200,
+  "url": "https://www.burgundywinecompany.com/",
+  "title": "Norske Automater - Beste norske spilleautomater på nett",
+  "platform": [
+   "cloudflare"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "Bottlerocket",
+  "domain": "bottlerocketwine.com",
+  "error": "Error: page.goto: net::ERR_CERT_COMMON_NAME_INVALID at https://www.bottlerocketwine.com/\nCall log:\n  - navigating to \"https://www.bottlerocketwine.com/\", waiting until \"domcontentloaded\"\n",
+  "xhr": []
+ },
+ {
+  "name": "Gotham Wines",
+  "domain": "gothamwines.com",
+  "status": 403,
+  "url": "https://www.gothamwines.com/",
+  "title": "ERROR: The request could not be satisfied",
+  "platform": [],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "PJ Wine",
+  "domain": "pjwine.com",
+  "status": 200,
+  "url": "https://pjwine.com/",
+  "title": "PJ Wine Online Store – PJ Wine, Inc.",
+  "platform": [
+   "shopify",
+   "captcha"
+  ],
+  "suggest": "200 [[\"Tenuta Bellafonte Pomontino Montefalco Rosso 2021\",\"16.97\"],[\"Paolo Bea Sagrantino Secco di Montefalco Vigneto Pagliaro 2020\",\"112.97\"],[\"Castello Colle Massari Montecucco Riserva 2020\",\"18.97\"]]",
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n    - lo",
+  "xhr": [
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://www.clarity.ms/tag/shopify/vpa8zbmagu",
+   "200 https://www.google.com/shopping/merchantverse/_/MerchantVerse/data/batchexecute?rpcids=BDBdAd&source-path=%2Fshopping%2Fmerchantverse%2F&bl=boq_shopping-merchantquality-merchantverse_20261014.04_p0&f.",
+   "200 https://pjwine.com/apps/otmacessiblyapp/widget/settings",
+   "200 https://www.googleadservices.com/pagead/conversion/10838653783/?random=1792298620340&cv=11&fst=1792298620340&fmt=7&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45be6ae1za200zb9126722364zd9126722364xecxf",
+   "200 https://pjwine.com/apps/otmacessiblyapp/widget/alt-tags",
+   "200 https://pjwine.com/apps/otmacessiblyapp/widget/query-alt-tags",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://pjwine.com/search/suggest.json?q=Monte%20Bello&resources[type]=product&resources[limit]=5"
+  ]
+ },
+ {
+  "name": "Park Ave Liquor",
+  "domain": "parkaveliquor.com",
+  "status": 200,
+  "url": "https://www.parkaveliquor.com/",
+  "title": "Park Avenue Liquor Shop Joins K&L",
+  "platform": [
+   "squarespace",
+   "captcha"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": [
+   "200 https://www.parkaveliquor.com/api/census/render-batch"
+  ]
+ },
+ {
+  "name": "Italian Wine Merchants",
+  "domain": "italianwinemerchants.com",
+  "status": 403,
+  "url": "https://www.italianwinemerchants.com/",
+  "title": "ERROR: The request could not be satisfied",
+  "platform": [],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "Le Du",
+  "domain": "leduwines.com",
+  "status": 200,
+  "url": "https://leduwines.com/",
+  "title": "Le Dú Wines - Le Dú Wines",
+  "platform": [
+   "woocommerce",
+   "cloudflare"
+  ],
+  "searchURL": "https://leduwines.com/?term=&s=Monte+Bello&post_type=post&taxonomy=category",
+  "priceLines": [],
+  "mentions": 0,
+  "xhr": [
+   "200 https://player.vimeo.com/cdn-cgi/challenge-platform/h/b/precursor/d2d3316b729e/0.30960919032926804:1792296109:gsgA4cGycYk8kQ2iprr5ycPXsY5s1j-LalO2YpwzZQM/a4c4e31aaaa12eea",
+   "200 https://player.vimeo.com/cdn-cgi/challenge-platform/h/b/precursor/d2d3316b729e/0.30960919032926804:1792296109:gsgA4cGycYk8kQ2iprr5ycPXsY5s1j-LalO2YpwzZQM/a4c4e31b4aff2eea",
+   "200 https://player.vimeo.com/cdn-cgi/challenge-platform/h/b/precursor/d2d3316b729e/0.30960919032926804:1792296109:gsgA4cGycYk8kQ2iprr5ycPXsY5s1j-LalO2YpwzZQM/a4c4e31b4b012eea",
+   "200 https://player.vimeo.com/cdn-cgi/challenge-platform/h/b/precursor/d2d3316b729e/0.30960919032926804:1792296109:gsgA4cGycYk8kQ2iprr5ycPXsY5s1j-LalO2YpwzZQM/a4c4e31b5b092eea",
+   "200 https://vimeo.com/flarepoint/orion/v3/identity/settings",
+   "200 https://vod-adaptive-ak.vimeocdn.com/exp=1792302259~acl=%2F25fd8515-48d3-49cd-8622-c1488d821fef%2Fpsid%3D71340c6a097523cd13ac733f895e3ad706cc6a4a1792298659%2F%2A~hmac=2ff7a0f536ebeebc34c1611efd0ff742c",
+   "200 https://vod-adaptive-ak.vimeocdn.com/exp=1792302259~acl=%2Fc379ebe4-7c5d-423e-97cb-350d7fbc6588%2Fpsid%3D41346c03d92d0b3deaffbf1ed0e65d51ffe4a7d11792298659%2F%2A~hmac=66bb277100c46a6c4b5523186b381ea23",
+   "200 https://vod-adaptive-ak.vimeocdn.com/exp=1792302259~acl=%2F06c2d76f-8286-4437-a9ab-2a1db48c4b9e%2Fpsid%3Dfdbc59f6d1e8017d1b7e550cc67044becacec6fc1792298659%2F%2A~hmac=7e87eb6e01a8ffd7c571ff2db8f2888c7",
+   "200 https://vod-adaptive-ak.vimeocdn.com/exp=1792302259~acl=%2Ff16babb9-035e-4517-a317-ccf58a3beec8%2Fpsid%3D8589e7484eabb881ac4ed0b9abd6f5d48c16cc501792298659%2F%2A~hmac=41667b3c96b81d11bb9d79665a15a4bfe"
+  ]
+ },
+ {
+  "name": "Discovery Wines",
+  "domain": "discoverywines.com",
+  "status": 200,
+  "url": "https://www.discoverywines.com/",
+  "title": "Discovery Wines | Wine Stores Near Me NYC | Natural wine shop NYC | Wine East Village | Wine and Spirits New York",
+  "platform": [
+   "captcha",
+   "nextjs"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": [
+   "200 https://clerk.discoverywines.com/v1/environment?__clerk_api_version=2025-11-10&_clerk_js_version=5.128.0",
+   "200 https://clerk.discoverywines.com/v1/client?__clerk_api_version=2025-11-10&_clerk_js_version=5.128.0",
+   "200 https://preview.ff-cdn.us5.datadoghq.com/precompute-assignments?dd_env=production",
+   "200 https://www.discoverywines.com/api/trpc/savedCart.validateLocalCartBundles,product.getCasePackByProducts?batch=1",
+   "200 https://www.discoverywines.com/api/trpc/organization.get,ecomPopup.getPopupContext,promotion.getAllValid,ecomStore.fromStore,ecomStore.getEndlessAisleRules,loyaltyProgram.getAll,promotion.getAll,ecomS",
+   "200 https://www.discoverywines.com/api/trpc/savedCart.validateLocalCartBundles,savedCart.validateLocalCartItems,product.getCasePackByProducts,product.getCasePackByProducts?batch=1",
+   "200 https://www.discoverywines.com/api/trpc/savedCart.validateLocalCartItems?batch=1"
+  ]
+ },
+ {
+  "name": "Bowery and Vine",
+  "domain": "boweryandvine.com",
+  "status": 200,
+  "url": "https://www.boweryandvine.com/",
+  "title": "Bowery & Vine, New York, NY",
+  "platform": [
+   "wix",
+   "cloudflare",
+   "captcha"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n    - lo",
+  "xhr": [
+   "200 https://www.boweryandvine.com//api/v1/merchants/546ba8163932330002030000/browse_categories/render.json",
+   "200 https://www.boweryandvine.com//api/v1/merchants/546ba8163932330002030000/browse_categories/render.json",
+   "200 https://www.boweryandvine.com//api/v1/users/customer/current.json?api_key=7508df878a8c7566a880e4d3f7fa7972&sdk_guid=ed6f9b3f-d081-dd4d-0c4f-eeab5dc0834d&ch_request_guid=0fdfd82d-939d-9172-a626-2d086bf",
+   "200 https://www.boweryandvine.com//api/v1/merchants/546ba8163932330002030000/browse_categories/render.json",
+   "200 https://www.boweryandvine.com//api/v1/widget_stat.json",
+   "200 https://www.boweryandvine.com//api/v1/widget_stat.json",
+   "200 https://www.boweryandvine.com//api/v1/widget_stat.json",
+   "200 https://www.boweryandvine.com//api/v1/merchants/546ba8163932330002030000/carts/open_carts.json?api_key=7508df878a8c7566a880e4d3f7fa7972&sdk_guid=ed6f9b3f-d081-dd4d-0c4f-eeab5dc0834d&ch_request_guid=33",
+   "200 https://www.boweryandvine.com//api/v1/widget_stat.json",
+   "200 https://www.boweryandvine.com//api/v1/widget_stat.json",
+   "200 https://www.boweryandvine.com//api/v1/widget_stat.json"
+  ]
+ },
+ {
+  "name": "Chelsea Wine Vault",
+  "domain": "chelseawinevault.com",
+  "status": 403,
+  "url": "https://www.chelseawinevault.com/",
+  "title": "ERROR: The request could not be satisfied",
+  "platform": [],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "Bottle Bargains",
+  "domain": "bottlebargains.com",
+  "status": 403,
+  "url": "https://www.bottlebargains.com/",
+  "title": "ERROR: The request could not be satisfied",
+  "platform": [],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "Wine Library",
+  "domain": "winelibrary.com",
+  "status": 403,
+  "url": "https://www.winelibrary.com/",
+  "title": "Just a moment...",
+  "platform": [
+   "cloudflare",
+   "challenge-platform"
+  ],
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n",
+  "xhr": []
+ },
+ {
+  "name": "Zachys",
+  "domain": "zachys.com",
+  "status": 200,
+  "url": "https://www.zachys.com/",
+  "title": "Buy Fine Wine & Spirits Online | Zachys",
+  "platform": [
+   "shopify",
+   "captcha",
+   "wineandliquor"
+  ],
+  "suggest": "200 [[\"Ridge Vineyards Monte Bello Cabernet Sauvignon 2022 (750ML)\",\"324.99\"],[\"Sassoalloro Castello di Montepo Jacopo Biondi Santi 2023 (750ML)\",\"26.99\"],[\"Brunello di Montalcino Le Lucere San Filippo 2021 (750ML)\",\"141.99\"],[\"Brunello di Montalcino Cerretalto Casanova di Neri 2019 (750ML)\",\"429.99\"],[\"Brunello di Montalcino Tenuta Nuova Casanova di Neri 2021 (750ML)\",\"139.99\"]]",
+  "searchError": "TimeoutError: locator.fill: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"search\"], input[name=\"q\"], input[name*=\"search\" i], input[placeholder*=\"earch\" i]').first()\n    - lo",
+  "xhr": [
+   "200 https://www.zachys.com/api/2026-07/graphql.json",
+   "200 https://settings.luckyorange.com/32631f64",
+   "200 https://cdn.shopify.com/extensions/01a14416-995f-7951-a981-854ef92a0fd4/judgeme-786/assets/manifest.json?v=1792298739541",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "200 https://www.zachys.com/api/2026-07/graphql.json",
+   "200 https://qvdt3feo.com/shopify/event?sync=true",
+   "200 https://cdn.acsbapp.com/cache/app/wildcards.json",
+   "200 https://www.zachys.com/api/2026-07/graphql.json",
+   "200 https://backend.alia-prod.com/launcher/users?path=%2F&url=https%3A%2F%2Fwww.zachys.com%2F&is_mobile=true&timezone=UTC&country=US&market=us&language=en&release_tag=v4.0.0&new_session=true",
+   "200 https://otlp-http-production.shopifysvc.com/v1/metrics",
+   "202 https://sessions.bugsnag.com/",
+   "200 https://www.zachys.com/cart.json",
+   "200 https://geo.rebuyengine.com/?key=753fed6da8d33929e82f7dbd6a08d676c0de4c55&cache_key=1792283232",
+   "200 https://cached.rebuyengine.com/api/v1/widgets/settings?id=282311&cache_key=1792283232",
+   "200 https://www.zachys.com/cart.json"
+  ]
+ },
+ {
+  "name": "Sokolin",
+  "domain": "sokolin.com",
+  "status": 200,
+  "url": "https://www.sokolin.com/",
+  "title": "Sokolin Fine Wine Merchants",
+  "platform": [
+   "magento",
+   "challenge-platform",
+   "captcha"
+  ],
+  "searchURL": "https://www.sokolin.com/catalogsearch/result/?q=Monte%20Bello",
+  "priceLines": [],
+  "mentions": 0,
+  "xhr": [
+   "200 https://firebase.googleapis.com/v1alpha/projects/-/apps/1:575001260818:web:4791a4a60fa3e2ea4fb9cb/webConfig",
+   "200 https://cdn.acsbapp.com/config/sokolin.com/config.json",
+   "200 https://www.sokolin.com/mst_banner/placeholder/loader/?isAjax=1&undefined&uniq=0.9142249903082381",
+   "200 https://www.sokolin.com/ajaxproductdata/ajax/productdata",
+   "200 https://firebaseinstallations.googleapis.com/v1/projects/sokolinapps/installations",
+   "200 https://cloud2.chatbeacon.io/ChatBeacon/SokolinLLC/613/api/visitor/account/site/session/valid",
+   "200 https://www.sokolin.com/graphql",
+   "200 https://cloud2.chatbeacon.io/ChatBeacon/SokolinLLC/613/api/visitor/account/site/session",
+   "200 https://cloud2.chatbeacon.io/ChatBeacon/SokolinLLC/613/api/visitor/account/site/session/sync"
+  ]
+ }
+]
