@@ -165,6 +165,25 @@ enum SelfTest {
             check("grapes without percentages", monte.details.grapes.first == "Cabernet Sauvignon", monte.details.grapes.joined(separator: ","))
         }
 
+        // 3e. Price check: real shop search answers read correctly.
+        let pj = (name: "PJ Wine", domain: "pjwine.com")
+        let pjListings = PriceChecker.listings(from: VinousFixtures.pjTondonia, shop: pj)
+        check("shop listings read", pjListings.count == 10 && pjListings[0].title == "Lopez de Heredia Tondonia Reserva Rioja 2012"
+              && pjListings[0].price == 43.97 && pjListings[0].url.hasPrefix("https://pjwine.com/products/") && !pjListings[0].url.contains("?"),
+              pjListings.first.map { "\($0.title) \($0.price) \($0.url)" } ?? "none")
+        let chambers = PriceChecker.listings(from: VinousFixtures.chambersMonteBello, shop: (name: "Chambers Street Wines", domain: "chambersstwines.com"))
+        check("sold-out listings left out", !chambers.contains { $0.title.contains("Monte Bello") } && !chambers.isEmpty)
+        let zachys = PriceChecker.listings(from: VinousFixtures.zachysTondonia, shop: (name: "Zachys", domain: "zachys.com"))
+        let picked = PriceChecker.offers(from: [(index: 0, vintage: "2012", bottleSize: ""), (index: 99, vintage: "", bottleSize: "")], listings: pjListings)
+        check("picked listings become offers", picked.count == 1 && picked[0].store == "PJ Wine" && picked[0].bottleSize == "750ml")
+        let merged = PriceChecker.merge(picked + picked, [StoreOffer(store: "Astor Wines & Spirits", price: 45, vintage: "2012", bottleSize: "750ml", url: "")])
+        check("offers merged without repeats", merged.count == 2)
+        let tondoniaQueries = PriceChecker.queries(for: bottle("R. López de Heredia", "Viña Tondonia Reserva", 2012))
+        check("shop search words", tondoniaQueries == ["R. Lopez de Heredia Vina Tondonia Reserva", "Vina Tondonia Reserva"],
+              tondoniaQueries.joined(separator: " | "))
+        check("zachys listings read", zachys.contains { $0.title.contains("(1.5L)") } && zachys.allSatisfy { $0.store == "Zachys" })
+        check("shop lists", PriceChecker.directShops.count == 5 && PriceChecker.searchedShops.count == 14)
+
         // 4. The label schema is a valid structured-output schema shape.
         let required = LabelReader.schema["required"] as? [String] ?? []
         let properties = (LabelReader.schema["properties"] as? [String: Any])?.keys.sorted() ?? []

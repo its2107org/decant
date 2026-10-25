@@ -134,7 +134,7 @@ struct VerdictPill: View {
 /// A list of New York shop prices with links.
 struct OffersList: View {
     var offers: [StoreOffer]
-    var limit = 8
+    var limit = 15
 
     var body: some View {
         VStack(spacing: 0) {
