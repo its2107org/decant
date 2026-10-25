@@ -5,7 +5,7 @@ on:
     paths: ["probe/**", ".github/workflows/probe.yml"]
 jobs:
   probe:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -13,9 +13,6 @@ jobs:
       - name: Run
         working-directory: probe
         run: |
-          npm init -y >/dev/null
-          npm i playwright@1.55.0 >/dev/null
-          npx playwright install --with-deps chromium >/dev/null
           timeout 1500 node shopify.mjs || true
       - name: Publish
         if: always()
