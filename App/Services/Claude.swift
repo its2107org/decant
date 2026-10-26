@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 enum ClaudeError: LocalizedError {
     case noKey
@@ -6,6 +7,7 @@ enum ClaudeError: LocalizedError {
     case noCredit
     case busy
     case offline
+    case dropped
     case unreadable
     case api(String)
 
@@ -16,6 +18,7 @@ enum ClaudeError: LocalizedError {
         case .noCredit: "Your Claude account is out of credit. Top it up at platform.claude.com."
         case .busy: "Claude is busy right now. Try again in a moment."
         case .offline: "No internet connection."
+        case .dropped: "The connection dropped before Claude finished. Try again, and stay in Decant until it's done."
         case .unreadable: "Couldn't make sense of the answer. Try again."
         case .api(let message): message
         }
@@ -103,6 +106,9 @@ enum Claude {
     /// Sends a request, carrying on if Claude pauses mid-search, and retrying once if it's busy.
     static func send(_ initialBody: [String: Any]) async throws -> [String: Any] {
         guard let key = KeyStore.claudeKey else { throw ClaudeError.noKey }
+        // Ask iOS for extra time so a look-up can finish if Ian briefly switches apps.
+        let background = await MainActor.run { UIApplication.shared.beginBackgroundTask(withName: "Claude") }
+        defer { Task { @MainActor in UIApplication.shared.endBackgroundTask(background) } }
         var body = initialBody
         let model = body["model"] as? String ?? sonnet
 
@@ -126,15 +132,25 @@ enum Claude {
         request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let offlineCodes: [URLError.Code] = [.notConnectedToInternet, .networkConnectionLost, .dataNotAllowed]
         let data: Data
         let response: URLResponse
         do {
             (data, response) = try await session.data(for: request)
-        } catch let error as URLError where offlineCodes.contains(error.code) {
-            throw ClaudeError.offline
+        } catch let error as URLError {
+            switch error.code {
+            case .notConnectedToInternet, .dataNotAllowed:
+                throw ClaudeError.offline
+            case .networkConnectionLost, .timedOut, .cannotConnectToHost, .secureConnectionFailed:
+                // A dropped connection (common on a phone moving between Wi-Fi and mobile data) isn't the
+                // same as being offline; try again before giving up.
+                guard attempt < 2 else { throw ClaudeError.dropped }
+                try await Task.sleep(for: .seconds(2))
+                return try await post(body, key: key, attempt: attempt + 1)
+            default:
+                throw error
+            }
         }
-        guard let http = response as? HTTPURLResponse else { throw ClaudeError.offline }
+        guard let http = response as? HTTPURLResponse else { throw ClaudeError.dropped }
 
         let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
         let message = ((json["error"] as? [String: Any])?["message"] as? String) ?? ""
