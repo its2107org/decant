@@ -1,0 +1,265 @@
+{
+  "checks" : [
+    {
+      "check" : "label answer decodes",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "search name",
+      "detail" : "Ridge Vineyards Monte Bello 2018",
+      "ok" : true
+    },
+    {
+      "check" : "price answer found and decodes",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "tidy drops zero prices",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "tidy fills range from exact vintage",
+      "detail" : "249.99–275.0",
+      "ok" : true
+    },
+    {
+      "check" : "verdict good",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "verdict high",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "score range sorts as middle",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "plain score",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "wine-searcher link",
+      "detail" : "https:\/\/www.wine-searcher.com\/find\/ridge+vineyards+monte+bello\/2018\/usa-ny",
+      "ok" : true
+    },
+    {
+      "check" : "vivino link",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "other vintage spotted",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "same vintage accepted",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "other vintage kept out of list",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "wrong match cleared",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "description names the wine",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "vinous results read",
+      "detail" : "3",
+      "ok" : true
+    },
+    {
+      "check" : "evesham 2024 matched",
+      "detail" : "evesham-wood-2024-pinot-noir-willamette-valley",
+      "ok" : true
+    },
+    {
+      "check" : "evesham review details",
+      "detail" : "Eric Guido 2026-2030 2024 https:\/\/vinous.com\/wines\/evesham-wood-2024-pinot-noir-willamette-valley false",
+      "ok" : true
+    },
+    {
+      "check" : "evesham search terms",
+      "detail" : "Evesham Wood Willamette Valley Pinot Noir | Evesham Wood | Willamette Valley Pinot Noir",
+      "ok" : true
+    },
+    {
+      "check" : "other evesham wines not matched",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "evesham vineyard is the same producer",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "ridge monte bello, not the chardonnay",
+      "detail" : "Monte Bello,Monte Bello,Monte Bello",
+      "ok" : true
+    },
+    {
+      "check" : "ridge full name matches too",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "margaux grand vin",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "bollinger NV spellings",
+      "detail" : "Brut Special Cuvee,BRUT SPECIAL CUVEE,Brut Special Cuvee,Special Cuvée Brut,Brut Special Cuvee,BRUT SPECIAL CUVEE,BRUT SPECIAL CUVEE,Brut Special Cuvee,Brut Special Cuvee,Brut Special Cuvee,Brut Special Cuvee,Brut Special Cuvee,Brut Special Cuvee",
+      "ok" : true
+    },
+    {
+      "check" : "NV review label",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "short search when a label word is missing",
+      "detail" : "R. López de Heredia Viña Tondonia Reserva | R. López de Heredia | López de Heredia | Viña Tondonia Reserva",
+      "ok" : true
+    },
+    {
+      "check" : "lopez left for Claude to decide",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "leflaive left for Claude to decide",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "vinous scores",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "newest scored review",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "vinous search page link",
+      "detail" : "https:\/\/vinous.com\/wines?filters=&term=Evesham%20Wood%20Willamette%20Valley%20Pinot%20Noir&page=1",
+      "ok" : true
+    },
+    {
+      "check" : "average of scores",
+      "detail" : "95.5",
+      "ok" : true
+    },
+    {
+      "check" : "all reviews listed with average",
+      "detail" : "91.5 2",
+      "ok" : true
+    },
+    {
+      "check" : "one review stays as it is",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "same review twice counted once",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "results grouped per wine",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "reviews saved with the wine",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "page reviews averaged, hidden score skipped",
+      "detail" : "93",
+      "ok" : true
+    },
+    {
+      "check" : "year split from search",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "grapes without percentages",
+      "detail" : "Cabernet Sauvignon,Merlot,Petit Verdot,Cabernet Franc",
+      "ok" : true
+    },
+    {
+      "check" : "shop listings read",
+      "detail" : "Lopez de Heredia Tondonia Reserva Rioja 2012 43.97 https:\/\/pjwine.com\/products\/lopez-de-heredia-tondonia-reserva-rioja-2013",
+      "ok" : true
+    },
+    {
+      "check" : "sold-out listings left out",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "picked listings become offers",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "offers merged without repeats",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "shop search words",
+      "detail" : "R. Lopez de Heredia Vina Tondonia Reserva | Vina Tondonia Reserva",
+      "ok" : true
+    },
+    {
+      "check" : "zachys listings read",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "shop lists",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "schema lists every field as required",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "schema serialises",
+      "detail" : "",
+      "ok" : true
+    },
+    {
+      "check" : "open a bottle",
+      "detail" : "",
+      "ok" : true
+    }
+  ],
+  "result" : "all passed"
+}
